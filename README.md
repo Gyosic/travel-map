@@ -14,23 +14,42 @@ pnpm dev
 bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 🤝 기여하기
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 📋 커밋 규칙
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+[Conventional Commits](https://www.conventionalcommits.org/) 규칙을 따릅니다.
 
-## Learn More
+| Type       | 의미                  | 예시                                  |
+| ---------- | --------------------- | ------------------------------------- |
+| `feat`     | 새로운 기능 추가      | `feat(auth): add OAuth login`         |
+| `fix`      | 버그 수정             | `fix(ui): button color issue`         |
+| `docs`     | 문서 수정             | `docs: update README`                 |
+| `style`    | 코드 포맷/스타일 변경 | `style: format code`                  |
+| `refactor` | 코드 리팩토링         | `refactor: optimize database queries` |
+| `perf`     | 성능 개선             | `perf: optimize image loading`        |
+| `test`     | 테스트 관련           | `test: add unit tests`                |
+| `chore`    | 빌드/패키지 매니저    | `chore: update dependencies`          |
 
-To learn more about Next.js, take a look at the following resources:
+### 🔄 기여 프로세스
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+1. **Fork the Project**
+2. **Add Remote Upstream**
+   ```bash
+   git remote add upstream https://github.com/Gyosic/portfolio.git
+   ```
+3. **Create Feature Branch**
+   ```bash
+   git checkout -b feature/AmazingFeature
+   ```
+4. **Commit Changes**
+   ```bash
+   git commit -m 'feat: add AmazingFeature'
+   ```
+5. **Push to Branch**
+   ```bash
+   git push origin feature/AmazingFeature
+   ```
+6. **Open Pull Request**
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+---
