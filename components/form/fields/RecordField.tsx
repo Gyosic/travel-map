@@ -7,7 +7,7 @@ import { FormItemWrapper } from "@/components/form/FormItemWrapper";
 import { TemplateFormItemProps } from "@/components/form/TemplateFormItem";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { guid } from "@/lib/ramdomize";
+import { guid } from "@/lib/randomize";
 
 export function RecordField<T extends FieldValues, K extends FieldPath<T>>({
   fieldModel,
