@@ -1,28 +1,16 @@
 "use client";
 
+import { BellIcon, ChevronDownIcon, HelpCircleIcon } from "lucide-react";
+import dynamic from "next/dynamic";
+import { Session } from "next-auth";
+import { signOut, useSession } from "next-auth/react";
 import * as React from "react";
-import { useEffect, useState, useRef, useMemo } from "react";
-import { BellIcon, HelpCircleIcon, ChevronDownIcon } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import {
-  NavigationMenu,
-  NavigationMenuItem,
-  NavigationMenuLink,
-  NavigationMenuList,
-} from "@/components/ui/navigation-menu";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { useEffect, useMemo, useRef, useState } from "react";
+import HistoryForm from "@/components/shared/HistoryForm";
+import { SigninForm } from "@/components/shared/SigninForm";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { cn } from "@/lib/utils";
-import { Session } from "next-auth";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -31,9 +19,27 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { SigninForm } from "@/components/shared/SigninForm";
-import { signOut, useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  NavigationMenu,
+  NavigationMenuItem,
+  NavigationMenuLink,
+  NavigationMenuList,
+} from "@/components/ui/navigation-menu";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
+
+const ThemeToggler = dynamic(
+  () => import("@/components/shared/ThemeToggler").then((module) => module.ThemeToggler),
+  { ssr: false },
+);
 
 // Simple logo component for the navbar
 const Logo = (props: React.SVGAttributes<SVGElement>) => {
@@ -85,7 +91,7 @@ const HamburgerIcon = ({ className, ...props }: React.SVGAttributes<SVGElement>)
   >
     <path
       d="M4 12L20 12"
-      className="origin-center -translate-y-[7px] transition-all duration-300 ease-[cubic-bezier(.5,.85,.25,1.1)] group-aria-expanded:translate-x-0 group-aria-expanded:translate-y-0 group-aria-expanded:rotate-[315deg]"
+      className="-translate-y-[7px] origin-center transition-all duration-300 ease-[cubic-bezier(.5,.85,.25,1.1)] group-aria-expanded:translate-x-0 group-aria-expanded:translate-y-0 group-aria-expanded:rotate-[315deg]"
     />
     <path
       d="M4 12H20"
@@ -130,10 +136,10 @@ const NotificationMenu = ({
 }) => (
   <DropdownMenu>
     <DropdownMenuTrigger asChild>
-      <Button variant="ghost" size="icon" className="h-9 w-9 relative">
+      <Button variant="ghost" size="icon" className="relative h-9 w-9">
         <BellIcon className="h-4 w-4" />
         {notificationCount > 0 && (
-          <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs">
+          <Badge className="-top-1 -right-1 absolute flex h-5 w-5 items-center justify-center p-0 text-xs">
             {notificationCount > 9 ? "9+" : notificationCount}
           </Badge>
         )}
@@ -145,20 +151,20 @@ const NotificationMenu = ({
       <DropdownMenuSeparator />
       <DropdownMenuItem onClick={() => onItemClick?.("notification1")}>
         <div className="flex flex-col gap-1">
-          <p className="text-sm font-medium">New message received</p>
-          <p className="text-xs text-muted-foreground">2 minutes ago</p>
+          <p className="font-medium text-sm">New message received</p>
+          <p className="text-muted-foreground text-xs">2 minutes ago</p>
         </div>
       </DropdownMenuItem>
       <DropdownMenuItem onClick={() => onItemClick?.("notification2")}>
         <div className="flex flex-col gap-1">
-          <p className="text-sm font-medium">System update available</p>
-          <p className="text-xs text-muted-foreground">1 hour ago</p>
+          <p className="font-medium text-sm">System update available</p>
+          <p className="text-muted-foreground text-xs">1 hour ago</p>
         </div>
       </DropdownMenuItem>
       <DropdownMenuItem onClick={() => onItemClick?.("notification3")}>
         <div className="flex flex-col gap-1">
-          <p className="text-sm font-medium">Weekly report ready</p>
-          <p className="text-xs text-muted-foreground">3 hours ago</p>
+          <p className="font-medium text-sm">Weekly report ready</p>
+          <p className="text-muted-foreground text-xs">3 hours ago</p>
         </div>
       </DropdownMenuItem>
       <DropdownMenuSeparator />
@@ -193,7 +199,7 @@ const UserMenu = ({
           className="h-9 px-2 py-0 hover:bg-accent hover:text-accent-foreground"
         >
           <Avatar className="h-7 w-7">
-            <AvatarImage src={userAvatar} alt={user?.name || ""} />
+            <AvatarImage src={user?.picture ?? ""} alt={user?.name || ""} />
             <AvatarFallback className="text-xs">
               {(user?.name ?? "")
                 .split(" ")
@@ -201,15 +207,15 @@ const UserMenu = ({
                 .join("")}
             </AvatarFallback>
           </Avatar>
-          <ChevronDownIcon className="h-3 w-3 ml-1" />
+          <ChevronDownIcon className="ml-1 h-3 w-3" />
           <span className="sr-only">User menu</span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-56">
         <DropdownMenuLabel>
           <div className="flex flex-col space-y-1">
-            <p className="text-sm font-medium leading-none">{user?.name ?? ""}</p>
-            <p className="text-xs leading-none text-muted-foreground">{user?.username ?? ""}</p>
+            <p className="font-medium text-sm leading-none">{user?.name ?? ""}</p>
+            <p className="text-muted-foreground text-xs leading-none">{user?.email ?? ""}</p>
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
@@ -319,7 +325,7 @@ export const Navbar = React.forwardRef<HTMLElement, NavbarProps>(
       <header
         ref={combinedRef}
         className={cn(
-          "sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-4 md:px-6 [&_*]:no-underline",
+          "sticky top-0 z-50 w-full border-b bg-background/95 px-4 backdrop-blur supports-[backdrop-filter]:bg-background/60 md:px-6 [&_*]:no-underline",
           className,
         )}
         {...props}
@@ -349,7 +355,7 @@ export const Navbar = React.forwardRef<HTMLElement, NavbarProps>(
                               e.preventDefault();
                               if (onNavItemClick && link.href) onNavItemClick(link.href);
                             }}
-                            className="flex w-full items-center rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground cursor-pointer no-underline"
+                            className="flex w-full cursor-pointer items-center rounded-md px-3 py-2 font-medium text-sm no-underline transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
                           >
                             {link.label}
                           </button>
@@ -364,7 +370,7 @@ export const Navbar = React.forwardRef<HTMLElement, NavbarProps>(
             <div className="flex items-center gap-6">
               <button
                 onClick={(e) => e.preventDefault()}
-                className="flex items-center space-x-2 text-primary hover:text-primary/90 transition-colors cursor-pointer"
+                className="flex cursor-pointer items-center space-x-2 text-primary transition-colors hover:text-primary/90"
               >
                 <div className="text-2xl">{logo}</div>
                 <span className="hidden font-bold text-xl sm:inline-block">{title}</span>
@@ -381,7 +387,7 @@ export const Navbar = React.forwardRef<HTMLElement, NavbarProps>(
                             e.preventDefault();
                             if (onNavItemClick && link.href) onNavItemClick(link.href);
                           }}
-                          className="text-muted-foreground hover:text-primary py-1.5 font-medium transition-colors cursor-pointer group inline-flex h-10 w-max items-center justify-center rounded-md bg-background px-4 py-2 text-sm focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50"
+                          className="group inline-flex h-10 w-max cursor-pointer items-center justify-center rounded-md bg-background px-4 py-1.5 py-2 font-medium text-muted-foreground text-sm transition-colors hover:text-primary focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50"
                         >
                           {link.label}
                         </NavigationMenuLink>
@@ -395,6 +401,7 @@ export const Navbar = React.forwardRef<HTMLElement, NavbarProps>(
           {/* Right side */}
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2">
+              <ThemeToggler />
               {/* Info menu */}
               <InfoMenu onItemClick={onInfoItemClick} />
               {/* Notification */}
@@ -402,6 +409,7 @@ export const Navbar = React.forwardRef<HTMLElement, NavbarProps>(
                 notificationCount={notificationCount}
                 onItemClick={onNotificationItemClick}
               />
+              <HistoryForm isDialog />
             </div>
             {/* User menu */}
             {session.status === "authenticated" ? (
