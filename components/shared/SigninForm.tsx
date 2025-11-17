@@ -31,7 +31,7 @@ export function SigninForm({ callbackUrl }: SigninFormProps) {
   const router = useRouter();
 
   const credentialSchema = z.object({
-    username: z.string().min(1, {
+    email: z.string().min(1, {
       message: "Username is required",
     }),
     password: z.string().min(1, {
@@ -48,7 +48,7 @@ export function SigninForm({ callbackUrl }: SigninFormProps) {
 
   const form = useForm<z.infer<typeof credentialSchema>>({
     resolver: zodResolver(credentialSchema),
-    defaultValues: { username: "", password: "" },
+    defaultValues: { email: "", password: "" },
   });
 
   // 2. Define a submit handler.
@@ -69,7 +69,7 @@ export function SigninForm({ callbackUrl }: SigninFormProps) {
     }
 
     if (remember) {
-      localStorage.setItem("rememberUsername", inputs.username!);
+      localStorage.setItem("rememberUsername", inputs.email!);
       localStorage.setItem("remember", remember.toString());
     } else {
       localStorage.removeItem("rememberUsername");
@@ -83,11 +83,11 @@ export function SigninForm({ callbackUrl }: SigninFormProps) {
   };
 
   useEffect(() => {
-    const username = localStorage.getItem("rememberUsername");
+    const email = localStorage.getItem("rememberUsername");
     const remember = localStorage.getItem("remember") === "true";
 
-    if (username && remember) {
-      form.setValue("username", username);
+    if (email && remember) {
+      form.setValue("email", email);
     }
   }, []);
 
@@ -97,7 +97,7 @@ export function SigninForm({ callbackUrl }: SigninFormProps) {
         <div className="grid gap-4">
           <FormField
             control={form.control}
-            name="username"
+            name="email"
             render={({ field }) => (
               <FormItem>
                 <div className="flex flex-col gap-2">
@@ -155,9 +155,14 @@ export function SigninForm({ callbackUrl }: SigninFormProps) {
             <Label htmlFor="remember">아이디 기억하기</Label>
           </div>
 
-          <Button type="submit" size="lg" variant="default" className="w-full font-semibold">
-            로그인
-          </Button>
+          <div className="flex flex-col gap-2">
+            <Button type="submit" size="lg" variant="default">
+              로그인
+            </Button>
+            <Button type="button" variant="outline" onClick={() => signIn("google")}>
+              Login with Google
+            </Button>
+          </div>
           {/* <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="name" className="text-right">
               ID
@@ -165,10 +170,10 @@ export function SigninForm({ callbackUrl }: SigninFormProps) {
             <Input id="name" defaultValue="Pedro Duarte" className="col-span-3" />
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="username" className="text-right">
+            <Label htmlFor="email" className="text-right">
               PW
             </Label>
-            <Input id="username" defaultValue="@peduarte" className="col-span-3" />
+            <Input id="email" defaultValue="@peduarte" className="col-span-3" />
           </div> */}
         </div>
       </form>
