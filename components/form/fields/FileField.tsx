@@ -6,6 +6,7 @@ import { FieldPath, FieldValues } from "react-hook-form";
 import z from "zod";
 import { FormItemWrapper } from "@/components/form/FormItemWrapper";
 import { TemplateFormItemProps } from "@/components/form/TemplateFormItem";
+import FileInput from "@/components/shared/FileInput";
 import { Button } from "@/components/ui/button";
 import { FormLabel } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
@@ -86,27 +87,28 @@ export function FieldField<T extends FieldValues, K extends FieldPath<T>>({
       className={labelPosition === "left" ? "flex flex-1 items-center" : "flex-1"}
       isForm={isForm}
       icon={fieldModel.icon as LucideIcon}
-      formLabel={
-        <FormLabel>
-          {fieldModel.name}
-          <Input
-            {...field}
-            value=""
-            ref={fileInputRef}
-            accept={fileExt}
-            type="file"
-            className="hidden w-0"
-            multiple={fieldModel.multiple}
-            onChange={onChangeFile}
-          />
-        </FormLabel>
-      }
+      // formLabel={
+      //   <FormLabel>
+      //     {fieldModel.name}
+      //     <Input
+      //       {...field}
+      //       value=""
+      //       ref={fileInputRef}
+      //       accept={fileExt}
+      //       type="file"
+      //       className="hidden w-0"
+      //       multiple={fieldModel.multiple}
+      //       onChange={onChangeFile}
+      //     />
+      //   </FormLabel>
+      // }
     >
       <div className="flex w-full flex-col items-end">
-        <Button type="button" variant="outline" onClick={handleFileInput}>
+        {/* <Button type="button" variant="outline" onClick={handleFileInput}>
           파일 선택
-        </Button>
-        {inputValue?.length > 0 ? (
+        </Button> */}
+        <FileInput multiple={fieldModel.multiple} onChange={field.onChange} />
+        {/* {inputValue?.length > 0 ? (
           inputValue?.map((file: File | z.infer<typeof zodFile>, i: number) => {
             return file ? (
               <div key={i} className="flex w-full items-center">
@@ -136,7 +138,7 @@ export function FieldField<T extends FieldValues, K extends FieldPath<T>>({
           })
         ) : (
           <></>
-        )}
+        )} */}
       </div>
     </FormItemWrapper>
   ) : (

@@ -39,6 +39,8 @@ export interface DaumPostcodeData {
   autoJibunAddress: string; // 지번 주소 (자동)
   sido: string; // 시도
   sigungu: string; // 시군구
+  sigunguCode: string; // 시군구 코드
+  bcode: string; // 법정동 코드
   roadname: string; // 도로명
   buildingCode: string; // 건물관리번호
 }

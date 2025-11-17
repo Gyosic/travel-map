@@ -1,7 +1,7 @@
 "use client";
 
-import * as React from "react";
 import { Star } from "lucide-react";
+import * as React from "react";
 
 import { IconButton } from "@/components/ui/shadcn-io/icon-button";
 
@@ -24,6 +24,7 @@ export const StarButton = ({ max = 5, onChange, value }: StarButtonProps) => {
       {number.map((num) => {
         return (
           <IconButton
+            type="button"
             key={num}
             icon={Star}
             active={num <= score}

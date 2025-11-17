@@ -9,6 +9,7 @@ import { FieldField } from "@/components/form/fields/FileField";
 import { NumberField } from "@/components/form/fields/NumberField";
 import { PasswordField } from "@/components/form/fields/PasswordField";
 import { RadioField } from "@/components/form/fields/RadioField";
+import { RatingField } from "@/components/form/fields/RatingField";
 import { RecordField } from "@/components/form/fields/RecordField";
 import { TextareaField } from "@/components/form/fields/TextareaField";
 import { TextField } from "@/components/form/fields/TextField";
@@ -53,6 +54,8 @@ export function TemplateFormItem<T extends FieldValues, K extends FieldPath<T>>(
       return <RecordField {...props} />;
     case "address":
       return <AddressField {...props} />;
+    case "rating":
+      return <RatingField {...props} />;
     default:
       return <TextField {...props} />;
   }
