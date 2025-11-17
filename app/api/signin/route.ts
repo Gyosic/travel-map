@@ -7,8 +7,8 @@ import { db } from "@/lib/pg";
 import { users } from "@/lib/schema/user.table";
 
 const sysadmin = {
-  _id: "sysadmin",
-  username: process.env.SYSADMIN_USERNAME || "admin",
+  id: "sysadmin",
+  email: process.env.SYSADMIN_EMAIL || "admin",
   password:
     process.env.SYSADMIN_PASSWORD ||
     "s/cEYL/gDobAwQelABhbqzQo0VlZz55ERgQqf3sywSL2tUDlG3hm5jZACPoMMJi66HpZery1uJpcFWEcMgIroQ==",
@@ -17,6 +17,8 @@ const sysadmin = {
     "ssXPKMmDGJf+IItWo5Z8OXlUI8OXipT16cl7iSt4spKrx1NAZHi5JViqOL6EvmKi/2b4keoC+HJocylaH9AuhQ==",
   is_sysadmin: true,
   name: "시스템관리자",
+  emailVerified: null,
+  image: null,
   created_at: null,
   updated_at: null,
 };
@@ -35,14 +37,14 @@ function getHash(data: string, type = "md5", digest: crypto.BinaryToTextEncoding
 }
 
 export async function POST(req: NextRequest & NextApiRequest) {
-  const { username, password }: { username: string; password: string; serviceId: string } =
+  const { email, password }: { email: string; password: string; serviceId: string } =
     await req.json();
 
-  const rows = await db.select().from(users).where(eq(users.username, username));
+  const rows = await db.select().from(users).where(eq(users.email, email));
 
   if (!rows.length) {
     // 시스템관리자 확인
-    if (sysadmin.username !== username) {
+    if (sysadmin.email !== email) {
       return NextResponse.json({
         error: {
           status: 400,
@@ -53,7 +55,7 @@ export async function POST(req: NextRequest & NextApiRequest) {
     rows.push(sysadmin);
   }
 
-  const [{ _id: userId, salt, password: userPassword, ...properties } = {}] = rows;
+  const [{ id: userId, salt, password: userPassword, ...properties } = {}] = rows;
 
   if (userPassword !== hmacEncrypt(password, salt!)) {
     const toDay = new Date();
@@ -70,7 +72,7 @@ export async function POST(req: NextRequest & NextApiRequest) {
 
   const userSession = {
     _id: userId,
-    username,
+    email,
     ip:
       req?.socket?.remoteAddress ||
       req?.headers?.get("x-forwarded-for")?.split(",")[0]?.trim() ||

@@ -2,7 +2,7 @@ import { isNil } from "es-toolkit";
 import z from "zod";
 
 export const userFormSchema = z.object({
-  username: z
+  email: z
     .string({
       error: (issue) => (isNil(issue.input) ? "필수 입력값 입니다." : "유효하지 않은 값입니다."),
     })

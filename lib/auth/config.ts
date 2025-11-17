@@ -1,11 +1,15 @@
+import { DrizzleAdapter } from "@auth/drizzle-adapter";
 import type { NextAuthConfig, Session } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
+import Google from "next-auth/providers/google";
 import { authorize } from "@/lib/auth/authorization";
+import { writeDb } from "@/lib/pg";
+import { accounts, users } from "@/lib/schema/user.table";
 
 export type NextAuthPageSearchParams = Promise<{ callbackUrl?: string }>;
 
 export interface Credentials {
-  username: string;
+  email: string;
   password: string;
 }
 
@@ -13,6 +17,10 @@ const secret = new TextEncoder().encode(process.env.AUTH_SECRET || "secret");
 
 const authConfig = {
   session: { strategy: "jwt" },
+  adapter: DrizzleAdapter(writeDb, {
+    usersTable: users,
+    accountsTable: accounts,
+  }),
   providers: [
     CredentialsProvider({
       id: "credentials",
@@ -20,18 +28,19 @@ const authConfig = {
       name: "credentials",
       // The credentials is used to generate a suitable form on the sign in page.
       // You can specify whatever fields you are expecting to be submitted.
-      // e.g. domain, username, password, 2FA token, etc.
+      // e.g. domain, email, password, 2FA token, etc.
       // You can pass any HTML attribute to the <input> tag through the object.
       credentials: {
-        username: { label: "Username", type: "text", placeholder: "ID를 입력해주세요." },
+        email: { label: "Username", type: "text", placeholder: "ID를 입력해주세요." },
         password: { label: "Password", type: "password", placeholder: "비밀번호를 입력해주세요." },
       },
       // Signin 할 때 사용 함: 사용자 정보 조회하고 객체 리턴하는 함수
       authorize,
     }),
+    Google,
   ],
   pages: {
-    signIn: "/signin",
+    signIn: "/",
     signOut: "/signout",
     error: "/error",
   },

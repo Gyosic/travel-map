@@ -2,12 +2,12 @@ import { cookies } from "next/headers";
 import type { User } from "next-auth";
 import { site } from "@/config";
 
-export const authorize = async (credentials: Partial<Record<"username" | "password", unknown>>) => {
+export const authorize = async (credentials: Partial<Record<"email" | "password", unknown>>) => {
   const signinRes = await fetch(new URL("/api/signin", site.baseurl), {
     method: "POST",
     headers: new Headers({ "Content-Type": "application/json" }),
     body: JSON.stringify({
-      username: credentials.username,
+      email: credentials.email,
       password: credentials.password,
     }),
   });
