@@ -1,5 +1,3 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
-
 ## Getting Started
 
 First, run the development server:
@@ -13,6 +11,12 @@ pnpm dev
 # or
 bun dev
 ```
+
+## 개요
+
+내가 여행 갔던곳 기록..
+
+기록된 여행일지 지도에 표시
 
 ## 🤝 기여하기
 
@@ -53,3 +57,5 @@ bun dev
 6. **Open Pull Request**
 
 ---
+
+This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
