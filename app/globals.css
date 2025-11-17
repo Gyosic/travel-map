@@ -2,7 +2,7 @@
 @import "tw-animate-css";
 @import "maplibre-gl/dist/maplibre-gl.css";
 
-@custom-variant dark (&:is(.dark *));
+@custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
 
 @theme inline {
   --color-background: var(--background);
@@ -120,4 +120,23 @@
   body {
     @apply bg-background text-foreground;
   }
+}
+
+.maplibregl-popup {
+  max-width: 320px;
+  background: transparent;
+  font-family: inherit;
+  border-radius: 12px;
+}
+
+.maplibregl-popup-content {
+  padding: 0;
+  border-radius: 12px;
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.2);
+  height: 100%;
+  background: transparent;
+}
+
+.maplibregl-popup-tip {
+  border-top-color: #111;
 }
