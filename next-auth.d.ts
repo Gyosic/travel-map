@@ -7,9 +7,11 @@ declare module "next-auth" {
     refresh_token?: string;
 
     _id?: number;
+    id?: string;
     username?: string;
     is_sysadmin?: boolean;
     ip?: string;
+    picture?: string;
   }
 
   interface Session {
