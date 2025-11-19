@@ -1,12 +1,12 @@
 "use client";
 
-import { BellIcon, ChevronDownIcon, HelpCircleIcon } from "lucide-react";
+import { BellIcon, ChevronDownIcon, HelpCircleIcon, Plus } from "lucide-react";
 import dynamic from "next/dynamic";
+import { useRouter } from "next/navigation";
 import { Session } from "next-auth";
 import { signOut, useSession } from "next-auth/react";
 import * as React from "react";
-import { useEffect, useMemo, useRef, useState } from "react";
-import HistoryForm from "@/components/shared/HistoryForm";
+import { useMemo, useRef } from "react";
 import { SigninForm } from "@/components/shared/SigninForm";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -27,13 +27,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  NavigationMenu,
-  NavigationMenuItem,
-  NavigationMenuLink,
-  NavigationMenuList,
-} from "@/components/ui/navigation-menu";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 
 const ThemeToggler = dynamic(
@@ -91,7 +84,7 @@ const HamburgerIcon = ({ className, ...props }: React.SVGAttributes<SVGElement>)
   >
     <path
       d="M4 12L20 12"
-      className="-translate-y-[7px] origin-center transition-all duration-300 ease-[cubic-bezier(.5,.85,.25,1.1)] group-aria-expanded:translate-x-0 group-aria-expanded:translate-y-0 group-aria-expanded:rotate-[315deg]"
+      className="-translate-y-[7px] origin-center transition-all duration-300 ease-[cubic-bezier(.5,.85,.25,1.1)] group-aria-expanded:translate-x-0 group-aria-expanded:translate-y-0 group-aria-expanded:rotate-315"
     />
     <path
       d="M4 12H20"
@@ -99,7 +92,7 @@ const HamburgerIcon = ({ className, ...props }: React.SVGAttributes<SVGElement>)
     />
     <path
       d="M4 12H20"
-      className="origin-center translate-y-[7px] transition-all duration-300 ease-[cubic-bezier(.5,.85,.25,1.1)] group-aria-expanded:translate-y-0 group-aria-expanded:rotate-[135deg]"
+      className="origin-center translate-y-[7px] transition-all duration-300 ease-[cubic-bezier(.5,.85,.25,1.1)] group-aria-expanded:translate-y-0 group-aria-expanded:rotate-135"
     />
   </svg>
 );
@@ -284,29 +277,9 @@ export const Navbar = React.forwardRef<HTMLElement, NavbarProps>(
     },
     ref,
   ) => {
-    const [isMobile, setIsMobile] = useState(false);
     const containerRef = useRef<HTMLElement>(null);
     const session = useSession();
-
-    useEffect(() => {
-      const checkWidth = () => {
-        if (containerRef.current) {
-          const width = containerRef.current.offsetWidth;
-          setIsMobile(width < 768); // 768px is md breakpoint
-        }
-      };
-
-      checkWidth();
-
-      const resizeObserver = new ResizeObserver(checkWidth);
-      if (containerRef.current) {
-        resizeObserver.observe(containerRef.current);
-      }
-
-      return () => {
-        resizeObserver.disconnect();
-      };
-    }, []);
+    const router = useRouter();
 
     // Combine refs
     const combinedRef = React.useCallback(
@@ -325,7 +298,7 @@ export const Navbar = React.forwardRef<HTMLElement, NavbarProps>(
       <header
         ref={combinedRef}
         className={cn(
-          "sticky top-0 z-50 w-full border-b bg-background/95 px-4 backdrop-blur supports-[backdrop-filter]:bg-background/60 md:px-6 [&_*]:no-underline",
+          "sticky top-0 z-50 w-full border-b bg-background/95 px-4 backdrop-blur **:no-underline supports-backdrop-filter:bg-background/60 md:px-6",
           className,
         )}
         {...props}
@@ -333,39 +306,6 @@ export const Navbar = React.forwardRef<HTMLElement, NavbarProps>(
         <div className="container mx-auto flex h-16 max-w-screen-2xl items-center justify-between gap-4">
           {/* Left side */}
           <div className="flex items-center gap-2">
-            {/* Mobile menu trigger */}
-            {isMobile && (
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    className="group h-9 w-9 hover:bg-accent hover:text-accent-foreground"
-                    variant="ghost"
-                    size="icon"
-                  >
-                    <HamburgerIcon />
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent align="start" className="w-64 p-1">
-                  <NavigationMenu className="max-w-none">
-                    <NavigationMenuList className="flex-col items-start gap-0">
-                      {navigationLinks.map((link, index) => (
-                        <NavigationMenuItem key={index} className="w-full">
-                          <button
-                            onClick={(e) => {
-                              e.preventDefault();
-                              if (onNavItemClick && link.href) onNavItemClick(link.href);
-                            }}
-                            className="flex w-full cursor-pointer items-center rounded-md px-3 py-2 font-medium text-sm no-underline transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
-                          >
-                            {link.label}
-                          </button>
-                        </NavigationMenuItem>
-                      ))}
-                    </NavigationMenuList>
-                  </NavigationMenu>
-                </PopoverContent>
-              </Popover>
-            )}
             {/* Main nav */}
             <div className="flex items-center gap-6">
               <button
@@ -373,29 +313,8 @@ export const Navbar = React.forwardRef<HTMLElement, NavbarProps>(
                 className="flex cursor-pointer items-center space-x-2 text-primary transition-colors hover:text-primary/90"
               >
                 <div className="text-2xl">{logo}</div>
-                <span className="hidden font-bold text-xl sm:inline-block">{title}</span>
+                <span className="inline-block font-bold text-xl">{title}</span>
               </button>
-              {/* Navigation menu */}
-              {!isMobile && (
-                <NavigationMenu className="flex">
-                  <NavigationMenuList className="gap-1">
-                    {navigationLinks.map((link, index) => (
-                      <NavigationMenuItem key={index}>
-                        <NavigationMenuLink
-                          href={link.href}
-                          onClick={(e) => {
-                            e.preventDefault();
-                            if (onNavItemClick && link.href) onNavItemClick(link.href);
-                          }}
-                          className="group inline-flex h-10 w-max cursor-pointer items-center justify-center rounded-md bg-background px-4 py-1.5 py-2 font-medium text-muted-foreground text-sm transition-colors hover:text-primary focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50"
-                        >
-                          {link.label}
-                        </NavigationMenuLink>
-                      </NavigationMenuItem>
-                    ))}
-                  </NavigationMenuList>
-                </NavigationMenu>
-              )}
             </div>
           </div>
           {/* Right side */}
@@ -409,7 +328,12 @@ export const Navbar = React.forwardRef<HTMLElement, NavbarProps>(
                 notificationCount={notificationCount}
                 onItemClick={onNotificationItemClick}
               />
-              <HistoryForm isDialog />
+              {/* <HistoryForm isDialog /> */}
+              {session.status === "authenticated" && (
+                <Button type="button" variant="ghost" onClick={() => router.push("/post")}>
+                  <Plus />
+                </Button>
+              )}
             </div>
             {/* User menu */}
             {session.status === "authenticated" ? (
