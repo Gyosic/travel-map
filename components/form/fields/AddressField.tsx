@@ -1,7 +1,9 @@
 "use client";
 
 import { LucideIcon, MapPin, Search } from "lucide-react";
+import maplibregl from "maplibre-gl";
 import Script from "next/script";
+import { useCallback, useEffect, useRef } from "react";
 import { FieldPath, FieldValues } from "react-hook-form";
 import { FormItemWrapper } from "@/components/form/FormItemWrapper";
 import { TemplateFormItemProps } from "@/components/form/TemplateFormItem";
@@ -45,6 +47,32 @@ export interface DaumPostcodeData {
   buildingCode: string; // 건물관리번호
 }
 
+export interface VWorldGetAddressResponse {
+  zipcode?: number; // 우편번호, 생략조건 : zipcode=false
+  type?: "ROAD" | "PARCEL"; // 주소 유형(ROAD, PARCEL), 생략조건 : simple=true
+  text: string; // 전체 주소 텍스트
+  structure: {
+    level0: string; // 국가
+    level1: string; // 시·도
+    level2: string; // 시·군·구
+    level3: string; // (일반구)구
+    level4L: string; // (도로)도로명, (지번)법정읍·면·동 명
+    level4LC: string; // (도로)도로코드, (지번)법정읍·면·동 코드
+    level4A: string; // (도로)행정읍·면·동 명, (지번)지원안함
+    level4AC: string; // (도로)행정읍·면·동 코드, (지번)지원안함
+    level5: string; // (도로)길, (지번)번지
+    detail: string; // 상세주소
+  };
+}
+
+export interface VWorldGetCoordResponse {
+  crs: string; // 응답결과 좌표계
+  point: {
+    x: number; // x좌표
+    y: number; // y좌표
+  };
+}
+
 export function AddressField<T extends FieldValues, K extends FieldPath<T>>({
   fieldModel,
   field,
@@ -54,18 +82,98 @@ export function AddressField<T extends FieldValues, K extends FieldPath<T>>({
   labelCls,
   addressOncomplete,
 }: TemplateFormItemProps<T, K>) {
-  const handlePostcode = () => {
-    // if (!scriptLoaded || !window.daum) {
-    //   alert("우편번호 서비스를 로딩중입니다. 잠시 후 다시 시도해주세요.");
-    //   return;
-    // }
+  const mapRef = useRef<maplibregl.Map>(null);
+  const markerRef = useRef<maplibregl.Marker>(null);
 
-    new window.daum.Postcode({
-      oncomplete: (data: DaumPostcodeData) => {
-        const event = { target: { value: data.address } };
+  const onLoadMap = useCallback(() => {
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const center: [number, number] = [position.coords.longitude, position.coords.latitude];
+
+        mapRef.current?.flyTo({ center });
+
+        const res = await fetch(
+          `/api/address?request=getAddress&type=BOTH&point=${center.join(",")}`,
+        );
+        const { response: { result = [] } = {} } = await res.json();
+
+        let address = result.find((item: { type: string }) => item.type === "road");
+        if (!address) address = result.find((item: { type: string }) => item.type === "parcel");
+
+        const event = { target: { value: address.text } };
         field.onChange(event);
 
-        addressOncomplete?.(data);
+        const marker = new maplibregl.Marker().setLngLat(center).addTo(mapRef.current!);
+        markerRef.current = marker;
+
+        addressOncomplete?.({ ...address, point: { x: center[0], y: center[1] } });
+      },
+      (err) => {},
+    );
+  }, []);
+  useEffect(() => {
+    if (mapRef.current) return;
+
+    const map = new maplibregl.Map({
+      container: "map",
+      style: "https://tiles.openfreemap.org/styles/liberty", // "https://demotiles.maplibre.org/style.json",
+      center: [127.03278133746, 37.569869315524],
+      zoom: 10,
+      attributionControl: false,
+    });
+
+    map.on("load", onLoadMap);
+    map.on("click", async (e) => {
+      const { lng, lat } = e.lngLat;
+      const center: [number, number] = [lng, lat];
+
+      if (markerRef.current) markerRef.current.remove();
+
+      markerRef.current = new maplibregl.Marker().setLngLat(center).addTo(map!);
+
+      mapRef.current?.flyTo({ center });
+
+      const res = await fetch(
+        `/api/address?request=getAddress&type=BOTH&point=${center.join(",")}`,
+      );
+      const { response: { result = [] } = {} } = await res.json();
+
+      let address = result.find((item: { type: string }) => item.type === "road");
+      if (!address) address = result.find((item: { type: string }) => item.type === "parcel");
+
+      const event = { target: { value: address.text } };
+      field.onChange(event);
+
+      addressOncomplete?.({ ...address, point: { x: lng, y: lat } });
+    });
+    map.resize();
+
+    mapRef.current = map;
+  }, [onLoadMap]);
+
+  const handlePostcode = () => {
+    new window.daum.Postcode({
+      oncomplete: async (data: DaumPostcodeData) => {
+        const { userSelectedType, jibunAddress, roadAddress } = data;
+        const address = userSelectedType === "R" ? roadAddress : jibunAddress;
+        const event = { target: { value: address } };
+
+        const res = await fetch(
+          `/api/address?request=getCoord&type=${userSelectedType === "R" ? "ROAD" : "PARCEL"}&address=${address}`,
+        );
+        const { response: { result: { point: { x, y } = {} } = {} } = {} } = await res.json();
+
+        if (!!x && !!y) {
+          if (markerRef.current) markerRef.current.remove();
+          markerRef.current = new maplibregl.Marker()
+            .setLngLat([Number(x), Number(y)])
+            .addTo(mapRef.current!);
+          mapRef.current?.flyTo({ center: [Number(x), Number(y)] });
+        }
+
+        field.onChange(event);
+
+        addressOncomplete?.({ ...data, point: { x: Number(x), y: Number(y) } });
       },
     }).open();
   };
@@ -94,6 +202,7 @@ export function AddressField<T extends FieldValues, K extends FieldPath<T>>({
               주소 검색
             </Button>
           </div>
+          <div id="map" className="h-50 w-full" />
         </div>
       </FormItemWrapper>
     </>
