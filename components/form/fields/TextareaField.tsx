@@ -19,10 +19,11 @@ export function TextareaField<T extends FieldValues, K extends FieldPath<T>>({
       desc={fieldModel.desc}
       isForm={isForm}
       className={cn(className, labelPosition === "left" ? "flex flex-1 items-center" : "flex-1")}
-      labelCls={labelCls}
+      labelCls={cn(labelCls)}
       icon={fieldModel.icon as LucideIcon}
     >
       <Textarea
+        className="max-h-62"
         readOnly={fieldModel.readOnly}
         placeholder={fieldModel?.placeholder ?? `입력하세요.`}
         {...field}
