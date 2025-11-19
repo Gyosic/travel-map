@@ -1,4 +1,4 @@
-import { date, integer, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
+import { date, integer, pgTable, point, text, timestamp, uuid, varchar } from "drizzle-orm/pg-core";
 import { users } from "@/lib/schema/user.table";
 
 // drizzle table 정의
@@ -8,10 +8,12 @@ export const histories = pgTable("histories", {
   date: date().notNull(),
   content: text().notNull(),
   address: text(),
+  lnglat: point(),
   emd_cd: text(),
   sgg_cd: text(),
   rating: integer(),
   images: text().array(),
+  tags: varchar().array(),
   user_id: text()
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),

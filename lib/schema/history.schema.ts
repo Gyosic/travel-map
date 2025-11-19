@@ -13,14 +13,18 @@ export const historyFormModel: Record<string, Model> = {
   address: { name: "주소", type: "address" },
   rating: { name: "만족도", type: "rating" },
   images: { name: "사진", type: "file", multiple: true },
+  tags: { name: "태그", type: "tag" },
 };
 export const historyFormSchema = z.object({
-  title: z.string().min(1, { message: "제목을 입력해주세요." }),
+  title: z.string({ message: "제목을 입력해주세요." }).min(1, { message: "제목을 입력해주세요." }),
   date: z.string(),
-  content: z.string().min(1, { message: "내용을 입력해주세요." }),
+  content: z
+    .string({ message: "내용을 입력해주세요." })
+    .min(1, { message: "내용을 입력해주세요." }),
   address: z.string().optional(),
   sgg_cd: z.string().optional(),
   emd_cd: z.string().optional(),
+  lnglat: z.array(z.number()).optional(),
   rating: z.number().optional(),
   images: z.array(z.instanceof(File).or(z.string())).optional(),
   user_id: z.string({ message: "user_id는 필수입력값 입니다." }),
