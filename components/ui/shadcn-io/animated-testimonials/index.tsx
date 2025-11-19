@@ -96,7 +96,7 @@ export const AnimatedTestimonials = ({
             ))}
           </AnimatePresence>
         </div>
-        <div className="flex flex-col py-4">
+        <div className="flex flex-col py-2">
           <motion.div
             key={active}
             initial={{
@@ -148,7 +148,7 @@ export const AnimatedTestimonials = ({
               ))}
             </motion.p> */}
           </motion.div>
-          <div className="flex gap-4 pt-12 md:pt-0 justify-center">
+          <div className="flex gap-4 justify-center">
             <button
               onClick={handlePrev}
               className="group/button flex h-7 w-7 items-center justify-center rounded-full bg-primary dark:bg-primary-foreground cursor-pointer"
