@@ -27,24 +27,23 @@ export async function POST(req: NextRequest & NextApiRequest) {
   } catch {}
 
   const session = await auth();
-  console.log(session);
 
   if (!session) return NextResponse.json("인증되지 않은 요청입니다.", { status: 401 });
 
   let query = db
     .select({ ...historyColumns })
     .from(histories)
-    .leftJoin(users, eq(users.id, session.user.id!))
+    .leftJoin(users, eq(users.id, histories.user_id))
     .$dynamic();
   let totalQuery = db
     .select({ total: count() })
     .from(histories)
-    .leftJoin(users, eq(users.id, session.user.id!))
+    .leftJoin(users, eq(users.id, histories.user_id))
     .$dynamic();
 
   const { whereCondition, orderCondition, pagingCondition } = selectQuerying(histories, body);
 
-  const where = [whereCondition];
+  const where = [whereCondition, eq(histories.user_id, session.user.id!)].filter(Boolean);
 
   query = query.where(and(...where));
   totalQuery = totalQuery.where(and(...where));
