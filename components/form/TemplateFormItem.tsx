@@ -1,7 +1,12 @@
 "use client";
 
 import type { ControllerRenderProps, FieldPath, FieldValues } from "react-hook-form";
-import { AddressField, DaumPostcodeData } from "@/components/form/fields/AddressField";
+import {
+  AddressField,
+  DaumPostcodeData,
+  VWorldGetAddressResponse,
+  VWorldGetCoordResponse,
+} from "@/components/form/fields/AddressField";
 import { BooleanField } from "@/components/form/fields/BooleanField";
 import { ComboboxField } from "@/components/form/fields/ComboboxField";
 import { DateField } from "@/components/form/fields/DateField";
@@ -11,6 +16,7 @@ import { PasswordField } from "@/components/form/fields/PasswordField";
 import { RadioField } from "@/components/form/fields/RadioField";
 import { RatingField } from "@/components/form/fields/RatingField";
 import { RecordField } from "@/components/form/fields/RecordField";
+import { TagField } from "@/components/form/fields/TagField";
 import { TextareaField } from "@/components/form/fields/TextareaField";
 import { TextField } from "@/components/form/fields/TextField";
 import type { Model } from "@/lib/schema/model";
@@ -22,7 +28,9 @@ export interface TemplateFormItemProps<T extends FieldValues, K extends FieldPat
   labelPosition?: "top" | "left";
   labelCls?: string;
   isForm?: boolean;
-  addressOncomplete?: (data: DaumPostcodeData) => void;
+  addressOncomplete?: (
+    data: DaumPostcodeData & Partial<VWorldGetAddressResponse> & Partial<VWorldGetCoordResponse>,
+  ) => void;
   isDuplicate?: boolean;
   onDuplicateCheck?: (key: string, value: string) => void;
 }
@@ -56,6 +64,8 @@ export function TemplateFormItem<T extends FieldValues, K extends FieldPath<T>>(
       return <AddressField {...props} />;
     case "rating":
       return <RatingField {...props} />;
+    case "tag":
+      return <TagField {...props} />;
     default:
       return <TextField {...props} />;
   }
