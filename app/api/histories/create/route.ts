@@ -9,13 +9,6 @@ import { histories } from "@/lib/schema/history.table";
 const storageName = "files";
 const fileSystemService = new FileSystem({ storageName });
 
-// Disable Next.js body parsing for this route
-export const config = {
-  api: {
-    bodyParser: false,
-  },
-};
-
 export async function POST(req: NextRequest) {
   const session = await auth();
 
@@ -24,11 +17,38 @@ export async function POST(req: NextRequest) {
   try {
     const formData = await req.formData();
     const { images: _images, ...history } = Object.fromEntries(formData.entries());
-    const images = formData.getAll("images") as File[];
+    const images = (formData.getAll("images").filter((v) => v instanceof File) ?? []) as File[];
+    // if (_tags) Object.assign(history, { tags: JSON.parse(_tags as string) });
 
     const parsed = await historyFormSchema
       .omit({ images: true })
-      .extend({ rating: z.coerce.number() })
+      .extend({
+        rating: z.coerce.number(),
+        // lnglat을 [number, number] 튜플로 강제 변환 (string/number[] 모두 허용)
+        lnglat: z.preprocess((v) => {
+          try {
+            const value = typeof v === "string" ? JSON.parse(v) : Array.isArray(v) ? v : null;
+
+            if (Array.isArray(value) && value.length >= 2) {
+              const x = Number(value[0]);
+              const y = Number(value[1]);
+              if (Number.isFinite(x) && Number.isFinite(y)) return [x, y];
+            }
+            return null;
+          } catch {
+            return null;
+          }
+        }, z.tuple([z.number(), z.number()]).nullable().optional()),
+        tags: z.preprocess((v) => {
+          try {
+            const value = typeof v === "string" ? JSON.parse(v) : Array.isArray(v) ? v : undefined;
+            if (Array.isArray(value)) return value;
+            return undefined;
+          } catch {
+            return undefined;
+          }
+        }, z.array(z.string()).optional()),
+      })
       .parseAsync(history);
 
     let result;
