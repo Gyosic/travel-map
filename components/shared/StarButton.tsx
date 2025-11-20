@@ -8,15 +8,16 @@ import { IconButton } from "@/components/ui/shadcn-io/icon-button";
 interface StarButtonProps {
   max?: number;
   value?: number;
-  onChange: (num?: number) => void;
+  readonly?: boolean;
+  onChange?: (num?: number) => void;
 }
-export const StarButton = ({ max = 5, onChange, value }: StarButtonProps) => {
+export const StarButton = ({ max = 5, onChange, value, readonly = false }: StarButtonProps) => {
   const [score, setScore] = React.useState(value ?? 0);
   const number = Array.from({ length: max }, (_, index) => index + 1);
   const handleClick = (num: number) => {
     setScore(num);
 
-    onChange(num);
+    onChange?.(num);
   };
 
   return (
@@ -28,7 +29,7 @@ export const StarButton = ({ max = 5, onChange, value }: StarButtonProps) => {
             key={num}
             icon={Star}
             active={num <= score}
-            onClick={() => handleClick(num)}
+            onClick={() => !readonly && handleClick(num)}
           />
         );
       })}
