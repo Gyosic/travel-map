@@ -15,13 +15,17 @@ export type Testimonial = {
 export interface AnimatedTestimonialsProps {
   testimonials: Testimonial[];
   autoplay?: boolean;
+  autoplayInterval?: number;
   className?: string;
+  enableBtn? :boolean;
 }
 
 export const AnimatedTestimonials = ({
   testimonials,
   autoplay = false,
+  autoplayInterval = 5000,
   className,
+  enableBtn = true,
 }: AnimatedTestimonialsProps) => {
   const [active, setActive] = useState(0);
 
@@ -39,7 +43,7 @@ export const AnimatedTestimonials = ({
 
   useEffect(() => {
     if (autoplay) {
-      const interval = setInterval(handleNext, 5000);
+      const interval = setInterval(handleNext, autoplayInterval);
       return () => clearInterval(interval);
     }
   }, [autoplay]);
@@ -148,7 +152,7 @@ export const AnimatedTestimonials = ({
               ))}
             </motion.p> */}
           </motion.div>
-          <div className="flex gap-4 justify-center">
+          {enableBtn && <div className="flex gap-4 justify-center">
             <button
               onClick={handlePrev}
               className="group/button flex h-7 w-7 items-center justify-center rounded-full bg-primary dark:bg-primary-foreground cursor-pointer"
@@ -161,7 +165,7 @@ export const AnimatedTestimonials = ({
             >
               <ChevronRight className="h-5 w-5 text-primary-foreground transition-transform duration-300 group-hover/button:-rotate-12 dark:text-neutral-400" />
             </button>
-          </div>
+          </div>}
         </div>
       </div>
     </div>
