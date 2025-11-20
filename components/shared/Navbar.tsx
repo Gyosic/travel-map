@@ -1,7 +1,7 @@
 "use client";
 
 import { BellIcon, ChevronDownIcon, HelpCircleIcon, Plus } from "lucide-react";
-import dynamic from "next/dynamic";
+// import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { Session } from "next-auth";
 import { signOut, useSession } from "next-auth/react";
@@ -29,10 +29,10 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 
-const ThemeToggler = dynamic(
-  () => import("@/components/shared/ThemeToggler").then((module) => module.ThemeToggler),
-  { ssr: false },
-);
+// const ThemeToggler = dynamic(
+//   () => import("@/components/shared/ThemeToggler").then((module) => module.ThemeToggler),
+//   { ssr: false },
+// );
 
 // Simple logo component for the navbar
 const Logo = (props: React.SVGAttributes<SVGElement>) => {
@@ -180,6 +180,7 @@ const UserMenu = ({
   userAvatar?: string;
   onItemClick?: (item: string) => void;
 }) => {
+  const router = useRouter();
   const user = useMemo(() => {
     if (!session) return null;
     return session.user;
@@ -219,6 +220,7 @@ const UserMenu = ({
         <DropdownMenuItem
           onClick={() => {
             signOut({ redirect: false });
+            router.refresh();
           }}
         >
           Log out
@@ -303,13 +305,16 @@ export const Navbar = React.forwardRef<HTMLElement, NavbarProps>(
         )}
         {...props}
       >
-        <div className="container mx-auto flex h-16 max-w-screen-2xl items-center justify-between gap-4">
+        <div className="mx-auto flex h-16 max-w-screen-2xl items-center justify-between gap-4">
           {/* Left side */}
           <div className="flex items-center gap-2">
             {/* Main nav */}
             <div className="flex items-center gap-6">
               <button
-                onClick={(e) => e.preventDefault()}
+                onClick={(e) => {
+                  e.preventDefault();
+                  router.push("/");
+                }}
                 className="flex cursor-pointer items-center space-x-2 text-primary transition-colors hover:text-primary/90"
               >
                 <div className="text-2xl">{logo}</div>
@@ -320,7 +325,8 @@ export const Navbar = React.forwardRef<HTMLElement, NavbarProps>(
           {/* Right side */}
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2">
-              <ThemeToggler />
+              {/* Theme toggler */}
+              {/* <ThemeToggler /> */}
               {/* Info menu */}
               <InfoMenu onItemClick={onInfoItemClick} />
               {/* Notification */}
