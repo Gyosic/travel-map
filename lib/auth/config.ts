@@ -13,7 +13,7 @@ export interface Credentials {
   password: string;
 }
 
-const secret = new TextEncoder().encode(process.env.AUTH_SECRET || "secret");
+// const secret = new TextEncoder().encode(process.env.AUTH_SECRET || "secret");
 
 const authConfig = {
   session: { strategy: "jwt" },
@@ -57,7 +57,7 @@ const authConfig = {
     signIn: async ({ user }): Promise<boolean> => Boolean(user.id),
     authorized: async ({ auth }): Promise<boolean> => Boolean(auth),
   },
-  secret: secret.toString(),
+  secret: process.env.AUTH_SECRET,
 } satisfies NextAuthConfig;
 
 export default authConfig;
