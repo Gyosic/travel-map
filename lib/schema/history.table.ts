@@ -9,6 +9,7 @@ export const histories = pgTable("histories", {
   content: text().notNull(),
   address: text(),
   lnglat: point(),
+  sido_cd: text(),
   emd_cd: text(),
   sgg_cd: text(),
   rating: integer(),

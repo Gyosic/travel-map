@@ -22,10 +22,12 @@ export const historyFormSchema = z.object({
     .string({ message: "내용을 입력해주세요." })
     .min(1, { message: "내용을 입력해주세요." }),
   address: z.string().optional(),
+  sido_cd: z.string().optional(),
   sgg_cd: z.string().optional(),
   emd_cd: z.string().optional(),
   lnglat: z.array(z.number()).optional(),
   rating: z.number().optional(),
+  tags: z.array(z.string()).optional(),
   images: z.array(z.instanceof(File).or(z.string())).optional(),
   user_id: z.string({ message: "user_id는 필수입력값 입니다." }),
 });
@@ -33,7 +35,6 @@ export type HistoryFormType = z.infer<typeof historyFormSchema>;
 
 export const historySchema = historyFormSchema.extend({
   _id: z.string(),
-  user_id: z.string(),
   created_at: z.date().optional(),
   updated_at: z.date().optional(),
 });
