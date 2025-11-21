@@ -28,7 +28,7 @@ export async function POST(req: NextRequest & NextApiRequest) {
 
   const session = await auth();
 
-  if (!session) return NextResponse.json("인증되지 않은 요청입니다.", { status: 401 });
+  if (!session) return NextResponse.json({ rows: [], rowCount: 0 });
 
   let query = db
     .select({ ...historyColumns })
