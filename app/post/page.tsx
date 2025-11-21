@@ -1,10 +1,8 @@
-import { redirect } from "next/navigation";
-import HistoryForm from "@/components/shared/HistoryForm";
+import { HistoryForm, UnauthHistoryForm } from "@/components/shared/HistoryForm";
 import { auth } from "@/lib/auth";
 
 export default async function PostPage() {
   const session = await auth();
-  if (!session) redirect("/");
 
-  return <HistoryForm />;
+  return session ? <HistoryForm user_id={session.user.id as string} /> : <UnauthHistoryForm />;
 }
