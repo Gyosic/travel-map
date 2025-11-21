@@ -25,7 +25,7 @@ export function ThemeToggler(
       onClick={handleThemeToggle}
       variant="circle"
       start="top-left"
-      className="bg-transparent hover:bg-secondary/80 rounded-full border-0 shadow-none"
+      className="rounded-full border-0 bg-transparent shadow-none hover:bg-secondary/80"
     />
   );
 }
