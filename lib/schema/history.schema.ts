@@ -1,4 +1,5 @@
 import z from "zod";
+import { fileSchema } from "@/lib/schema/file";
 import { Model } from "@/lib/schema/model";
 
 export const historyFormModel: Record<string, Model> = {
@@ -12,7 +13,12 @@ export const historyFormModel: Record<string, Model> = {
   content: { name: "내용", type: "textarea", required: true },
   address: { name: "주소", type: "address" },
   rating: { name: "만족도", type: "rating" },
-  images: { name: "사진", type: "file", multiple: true },
+  images: {
+    name: "사진",
+    type: "file",
+    multiple: true,
+    accept: ["jpg", "jpeg", "png", "gif", "bmp", "webp"],
+  },
   tags: { name: "태그", type: "tag" },
 };
 export const historyFormSchema = z.object({
@@ -28,7 +34,7 @@ export const historyFormSchema = z.object({
   lnglat: z.array(z.number()).optional(),
   rating: z.number().optional(),
   tags: z.array(z.string()).optional(),
-  images: z.array(z.instanceof(File).or(z.string())).optional(),
+  images: z.array(z.instanceof(File).or(fileSchema)).optional(),
   user_id: z.string({ message: "user_id는 필수입력값 입니다." }),
 });
 export type HistoryFormType = z.infer<typeof historyFormSchema>;

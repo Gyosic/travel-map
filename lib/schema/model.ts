@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { extensionToMime } from "@/lib/schema/file";
 
 export const dataTypes = [
   { label: "문자", value: "text" },
@@ -40,18 +41,7 @@ export const dataTypeOptions: Record<string, Record<string, Model>> = {
     accept: {
       name: "파일형식",
       type: "checkbox",
-      enums: {
-        JPEG: "image/jpeg",
-        JPG: "image/jpg",
-        PNG: "image/png",
-        GIF: "image/gif",
-        WEBP: "image/webp",
-        BMP: "image/bmp",
-        TIFF: "image/tiff",
-        SVG: "image/svg+xml",
-        HEIF: "image/heif",
-        HEIC: "image/heic",
-      },
+      enums: extensionToMime,
     },
     default: { name: "기본값", type: "array", items: { name: "파일", type: "file" } },
     multiple: { name: "다중선택", type: "boolean", default: false },

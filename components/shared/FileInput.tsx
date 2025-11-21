@@ -1,10 +1,14 @@
 "use client";
+
+import { X } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { Accept } from "react-dropzone";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carousel";
 import { Dropzone, DropzoneContent, DropzoneEmptyState } from "@/components/ui/shadcn-io/dropzone";
+import { FileType } from "@/lib/schema/file";
 
 interface FileInputProps {
   accept?: Accept;
@@ -12,36 +16,65 @@ interface FileInputProps {
   value?: File[];
   onChange?: (...args: unknown[]) => void;
 }
-export default function FileInput({ accept, multiple, onChange }: FileInputProps) {
-  const [files, setFiles] = useState<File[] | undefined>();
-  const [filePreview, setFilePreview] = useState<string[]>([]);
+export default function FileInput({ accept, value = [], multiple, onChange }: FileInputProps) {
+  const [files, setFiles] = useState<File[] | FileType[] | undefined>(value);
+  const [filePreview, setFilePreview] = useState<File[]>([]);
 
-  const handleDrop = (files: File[]) => {
+  const handleDrop = (inputs: File[]) => {
     if (multiple)
       setFiles((prev) => {
-        if (prev) return prev.concat(files);
-        else return files;
+        return prev?.concat(inputs) ?? inputs;
       });
-    else setFiles(files);
+    else setFiles(inputs);
+  };
 
-    if (files.length > 0) {
-      files.forEach((file) => {
-        const fileReader = new FileReader();
+  const readAsDataURL = async (file: File) => {
+    return new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        if (typeof reader.result === "string") resolve(reader.result);
+        else reject(new Error("Failed to read file"));
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  };
 
-        fileReader.onload = (e) => {
-          if (typeof e.target?.result === "string") {
-            if (multiple)
-              setFilePreview((prev) => [...prev, e.target?.result as string].filter(Boolean));
-            else setFilePreview([e.target?.result as string]);
-          }
-        };
+  const parseFiles = async (files: File[]) => {
+    const newFilePreview = [];
+    for (const file of files) {
+      try {
+        const src = await readAsDataURL(file);
 
-        fileReader.readAsDataURL(file);
-      });
+        newFilePreview.push({
+          ...file,
+          name: file.name,
+          src,
+          lastModified: file.lastModified,
+          size: file.size,
+        });
+      } catch {
+        newFilePreview.push({ ...file, src: `/api/files${file.src}` });
+      }
+    }
+
+    setFilePreview(newFilePreview as File[]);
+  };
+
+  const handleRemove = async (name: string) => {
+    const file = files?.find((file) => file.name === name);
+
+    if (file) {
+      if (!(file instanceof File)) {
+        await fetch(`/api/files${file.src}`, { method: "DELETE" });
+      }
+      setFiles((prev) => prev?.filter((f) => f.name !== name) ?? []);
     }
   };
 
   useEffect(() => {
+    parseFiles(files as File[]);
+
     onChange?.(files);
   }, [files]);
 
@@ -53,34 +86,36 @@ export default function FileInput({ accept, multiple, onChange }: FileInputProps
         accept={accept}
         onDrop={handleDrop}
         onError={console.error}
-        src={files}
+        src={files as File[]}
       >
         <DropzoneEmptyState />
-        <DropzoneContent>
-          {/* {filePreview && (
-            <div className="h-[102px] w-full">
-              <img
-                alt="Preview"
-                className="absolute top-0 left-0 h-full w-full object-cover"
-                src={filePreview}
-              />
-            </div>
-          )} */}
-        </DropzoneContent>
+        <DropzoneContent></DropzoneContent>
       </Dropzone>
 
       <Carousel className="w-full">
         <CarouselContent className="ml-0">
-          {filePreview.map((src, index) => (
+          {filePreview?.map((file, index) => (
             <CarouselItem key={index} className="basis-full pl-0">
               <div className="w-full">
                 <Card className="relative">
                   <CardContent className="flex h-[180px] p-0">
-                    <span className="absolute top-0 right-2 font-bold">{index + 1}</span>
+                    <div className="absolute top-0 flex w-full items-center justify-between ps-2">
+                      <span className="font-bold">{index + 1}</span>
+                      <Button
+                        variant="ghost"
+                        type="button"
+                        size="icon"
+                        className="hover:bg-transparent hover:text-red-500"
+                        onClick={() => handleRemove(file.name)}
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+
                     <Image
                       alt="Preview"
                       className="h-full w-full object-cover"
-                      src={src || ""}
+                      src={file.src}
                       width={1000}
                       height={1000}
                     />

@@ -3,10 +3,11 @@ import z from "zod";
 import { auth } from "@/lib/auth";
 import FileSystem from "@/lib/fileSystem";
 import { writeDb as db } from "@/lib/pg";
+import { FileType } from "@/lib/schema/file";
 import { historyFormSchema } from "@/lib/schema/history.schema";
 import { histories } from "@/lib/schema/history.table";
 
-const storageName = "files";
+const storageName = "images";
 const fileSystemService = new FileSystem({ storageName });
 
 export async function POST(req: NextRequest) {
@@ -18,7 +19,6 @@ export async function POST(req: NextRequest) {
     const formData = await req.formData();
     const { images: _images, ...history } = Object.fromEntries(formData.entries());
     const images = (formData.getAll("images").filter((v) => v instanceof File) ?? []) as File[];
-    // if (_tags) Object.assign(history, { tags: JSON.parse(_tags as string) });
 
     const parsed = await historyFormSchema
       .omit({ images: true })
@@ -52,32 +52,22 @@ export async function POST(req: NextRequest) {
       .parseAsync(history);
 
     let result;
-    const files: string[] = [];
+    const files: FileType[] = [];
 
     try {
       await db.transaction(async (tx) => {
-        // Ensure "images" is always an array
-        // let imagesArray: File[] = [];
-        // const imagesRaw = images;
-
-        // if (Array.isArray(imagesRaw)) {
-        //   imagesArray = imagesRaw.filter((img) => img instanceof File) as File[];
-        // } else if (imagesRaw instanceof File) {
-        //   imagesArray = [imagesRaw];
-        // } else if (imagesRaw !== undefined) {
-        //   // Some clients may send as string or single object
-        //   // Try to coerce if possible
-        //   if (typeof imagesRaw === "object" && "arrayBuffer" in imagesRaw) {
-        //     imagesArray = [imagesRaw as File];
-        //   }
-        // }
-
         for (const image of images as File[]) {
           const buffer = await image.arrayBuffer();
 
           const filename = fileSystemService.genFilename();
-          // const url = `/${storageName}/${filename}`;
-          files.push(filename);
+          const src = `/${storageName}/${filename}`;
+          files.push({
+            name: image.name,
+            lastModified: image.lastModified,
+            type: image.type,
+            size: image.size,
+            src,
+          });
           await fileSystemService.write({ filepath: filename, content: Buffer.from(buffer) });
         }
 
@@ -91,8 +81,8 @@ export async function POST(req: NextRequest) {
       // If transaction fails, clean up the uploaded file
       if (files.length > 0) {
         try {
-          for (const filename of files) {
-            await fileSystemService.unlink({ filepath: filename });
+          for (const { src } of files) {
+            await fileSystemService.unlink({ filepath: src });
           }
         } catch (unlinkError) {
           console.error("Failed to cleanup file:", unlinkError);
