@@ -56,27 +56,29 @@ export function SigninForm({ callbackUrl }: SigninFormProps) {
     // Do something with the form values.
     // ✅ This will be type-safe and validated.
 
-    const res = await signIn("credentials", {
-      ...inputs,
-      redirect: false,
-    });
-
-    if (res.error) {
-      return toast("[로그인]", {
-        description: cookies.auth_error || "로그인에 실패하였습니다.",
-        position: "top-right",
+    try {
+      const res = await signIn("credentials", {
+        ...inputs,
+        redirect: false,
       });
-    }
 
-    if (remember) {
-      localStorage.setItem("rememberUsername", inputs.email!);
-      localStorage.setItem("remember", remember.toString());
-    } else {
-      localStorage.removeItem("rememberUsername");
-      localStorage.removeItem("remember");
-    }
+      if (res.error) {
+        return toast("[로그인]", {
+          description: cookies.auth_error || "로그인에 실패하였습니다.",
+          position: "top-right",
+        });
+      }
 
-    if (callbackUrl) return router.push(callbackUrl);
+      if (remember) {
+        localStorage.setItem("rememberUsername", inputs.email!);
+        localStorage.setItem("remember", remember.toString());
+      } else {
+        localStorage.removeItem("rememberUsername");
+        localStorage.removeItem("remember");
+      }
+
+      if (callbackUrl) return router.push(callbackUrl);
+    } catch {}
   };
   const handleChangeRemember = (isRemember: boolean) => {
     setRemember(isRemember);
