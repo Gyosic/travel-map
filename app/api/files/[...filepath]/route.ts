@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { Readable } from "stream";
 import FileSystem from "@/lib/fileSystem";
 
-const fileSystemService = new FileSystem({ storageName: "files" });
+const fileSystemService = new FileSystem({ storageName: "" });
 
 type Params = { filepath: string[] };
 
@@ -48,6 +48,20 @@ export async function GET(req: NextRequest, { params }: { params: Promise<Params
         headers,
       });
     }
+  } catch (error) {
+    const { message } = error as Error;
+    return NextResponse.json({ error: message }, { status: 404 });
+  }
+}
+
+export async function DELETE(req: NextRequest, { params }: { params: Promise<Params> }) {
+  try {
+    const { filepath: _filepath } = await params;
+    const filepath = _filepath.join("/");
+
+    await fileSystemService.unlink({ filepath });
+
+    return NextResponse.json({ message: "File deleted successfully" }, { status: 200 });
   } catch (error) {
     const { message } = error as Error;
     return NextResponse.json({ error: message }, { status: 404 });
