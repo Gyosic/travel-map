@@ -41,6 +41,8 @@ export const AnimatedTestimonials = ({
     return index === active;
   };
 
+  const DRAG_THRESHOLD = 50;
+
   useEffect(() => {
     if (autoplay) {
       const interval = setInterval(handleNext, autoplayInterval);
@@ -60,6 +62,12 @@ export const AnimatedTestimonials = ({
             {testimonials.map((testimonial, index) => (
               <motion.div
                 key={testimonial.src}
+                drag="x"
+                dragConstraints={{ left: 0, right: 0 }}
+                onDragEnd={(_, info) => {
+                  if (info.offset.x < -DRAG_THRESHOLD) handleNext();
+                  else if (info.offset.x > DRAG_THRESHOLD) handlePrev();
+                }}
                 initial={{
                   opacity: 0,
                   scale: 0.9,
