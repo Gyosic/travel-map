@@ -196,6 +196,13 @@ class FileSystem {
     }
   }
 
+  async rename({ from, to }: { from: string; to: string }) {
+    const fromPath = this.getPath({ filepath: from });
+    const toPath = this.getPath({ filepath: to });
+
+    await fsPromises.rename(fromPath, toPath);
+  }
+
   async getContentType({
     filepath,
     filename,
