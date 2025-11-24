@@ -72,19 +72,25 @@ export function Feed({ sido_cd }: FeedProps) {
   };
 
   const onDelete = async () => {
-    const newPagination = { ...pagination, pageIndex: 0 };
-    const newFilter = { ...filter, pagination: newPagination };
+    if (session.status !== "authenticated") {
+      const localHistories = JSON.parse(localStorage.getItem("histories") || "[]");
 
-    const response = await fetch("/api/histories", {
-      method: "POST",
-      body: JSON.stringify(newFilter),
-    });
+      setData({ rows: localHistories, rowCount: localHistories.length });
+    } else {
+      const newPagination = { ...pagination, pageIndex: 0 };
+      const newFilter = { ...filter, pagination: newPagination };
 
-    const data = await response.json();
+      const response = await fetch("/api/histories", {
+        method: "POST",
+        body: JSON.stringify(newFilter),
+      });
 
-    setData(data);
+      const data = await response.json();
 
-    setPagination(newPagination);
+      setData(data);
+
+      setPagination(newPagination);
+    }
   };
 
   useEffect(() => {
