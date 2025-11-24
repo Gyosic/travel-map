@@ -58,7 +58,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<Params
     const parsed = await schema
       .omit({ images: true })
       .extend({
-        rating: z.coerce.number(),
+        rating: z.coerce.number().optional(),
         // lnglat을 [number, number] 튜플로 강제 변환 (string/number[] 모두 허용)
         lnglat: z.preprocess((v) => {
           try {
