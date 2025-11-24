@@ -77,7 +77,9 @@ export function HistoryForm({ className, user_id }: HistoryFormProps) {
           if (value.every((item) => item instanceof File)) {
             value.filter(Boolean).forEach((file) => formdata.append(key, file));
           } else formdata.append(key, JSON.stringify(value));
-        } else formdata.append(key, value as string);
+        } else {
+          if (!isNil(value)) formdata.append(key, value as string);
+        }
       }
 
       try {
@@ -191,7 +193,6 @@ export function HistoryUpdateForm({ className, user_id, history }: HistoryUpdate
 
   const onSubmit = handleSubmit(
     async (inputs: HistoryUpdateFormType) => {
-      console.info(inputs);
       const formdata = new FormData();
 
       for (const [key, value] of Object.entries(inputs)) {
@@ -199,7 +200,9 @@ export function HistoryUpdateForm({ className, user_id, history }: HistoryUpdate
           if (value.some((item) => item instanceof File)) {
             value.filter(Boolean).forEach((file) => formdata.append(key, file as File | string));
           } else formdata.append(key, JSON.stringify(value));
-        } else formdata.append(key, value as string);
+        } else {
+          if (!isNil(value)) formdata.append(key, value as string);
+        }
       }
 
       try {
@@ -323,7 +326,9 @@ export function UnauthHistoryForm({ className }: UnauthHistoryFormProps) {
           if (value.every((item) => item instanceof File)) {
             value.filter(Boolean).forEach((file) => formdata.append(key, file));
           } else formdata.append(key, JSON.stringify(value));
-        } else formdata.append(key, value as string);
+        } else {
+          if (!isNil(value)) formdata.append(key, value as string);
+        }
       }
 
       try {
@@ -331,6 +336,9 @@ export function UnauthHistoryForm({ className }: UnauthHistoryFormProps) {
           method: "POST",
           body: formdata,
         });
+
+        if (!response.ok) return toast.error(await response.text());
+
         const history = await response.json();
 
         const localHistories = JSON.parse(localStorage.getItem("histories") || "[]");

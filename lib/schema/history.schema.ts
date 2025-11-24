@@ -10,7 +10,7 @@ export const historyFormModel: Record<string, Model> = {
     required: true,
     default: new Date().toISOString().slice(0, 10),
   },
-  content: { name: "내용", type: "textarea", required: true },
+  content: { name: "내용", type: "textarea" },
   address: { name: "주소", type: "address" },
   rating: { name: "만족도", type: "rating" },
   images: {
@@ -24,9 +24,7 @@ export const historyFormModel: Record<string, Model> = {
 export const historyFormSchema = z.object({
   title: z.string({ message: "제목을 입력해주세요." }).min(1, { message: "제목을 입력해주세요." }),
   date: z.string(),
-  content: z
-    .string({ message: "내용을 입력해주세요." })
-    .min(1, { message: "내용을 입력해주세요." }),
+  content: z.string().optional(),
   address: z.string().optional(),
   sido_cd: z.string().optional(),
   sgg_cd: z.string().optional(),

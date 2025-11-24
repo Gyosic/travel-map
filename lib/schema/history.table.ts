@@ -16,7 +16,7 @@ export const histories = pgTable("histories", {
   _id: uuid().primaryKey().defaultRandom(),
   title: text().notNull(),
   date: date().notNull(),
-  content: text().notNull(),
+  content: text(),
   address: text(),
   lnglat: point(),
   sido_cd: text(),
