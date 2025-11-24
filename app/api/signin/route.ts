@@ -1,6 +1,5 @@
 import crypto from "crypto";
 import { eq } from "drizzle-orm";
-import { NextApiRequest } from "next";
 import { NextRequest, NextResponse } from "next/server";
 import { date } from "@/lib/format";
 import { db } from "@/lib/pg";
@@ -36,7 +35,7 @@ function getHash(data: string, type = "md5", digest: crypto.BinaryToTextEncoding
   return crypto.createHash(type).update(data).digest(digest);
 }
 
-export async function POST(req: NextRequest & NextApiRequest) {
+export async function POST(req: NextRequest) {
   const { email, password }: { email: string; password: string; serviceId: string } =
     await req.json();
 
@@ -74,7 +73,6 @@ export async function POST(req: NextRequest & NextApiRequest) {
     _id: userId,
     email,
     ip:
-      req?.socket?.remoteAddress ||
       req?.headers?.get("x-forwarded-for")?.split(",")[0]?.trim() ||
       req.headers.get("x-real-ip") ||
       "127.0.0.1",
