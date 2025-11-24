@@ -8,13 +8,15 @@ const fileInstanceSchema = z.union([
   // File 인스턴스
   z.instanceof(File),
   // 기존 파일 객체
-  fileSchema.partial().extend({
-    name: z.string(),
-    size: z.number(),
-    type: z.string(),
-    lastModified: z.number(),
-    path: z.string().optional(), // 서버에 저장된 경로
-  }),
+  fileSchema
+    .partial()
+    .extend({
+      name: z.string(),
+      size: z.number(),
+      type: z.string(),
+      lastModified: z.number(),
+      path: z.string().optional(), // 서버에 저장된 경로
+    }),
 ]);
 
 // Enum 타입 헬퍼
@@ -178,8 +180,7 @@ export const buildSchema = <T extends Record<string, Model>>(model: T) => {
               (file) => {
                 // 파일 확장자 검증
                 if (fieldModel.accept && fieldModel.accept.length > 0) {
-                  const fileName =
-                    file instanceof File ? file.name : (file?.originalname ?? file?.name);
+                  const fileName = file?.name;
                   const fileExtension = fileName?.split(".").pop()?.toLowerCase();
                   return fieldModel.accept.includes(fileExtension || "");
                 }

@@ -23,8 +23,8 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<Par
 
   const [row] = await db.select().from(histories).where(eq(histories._id, _id));
 
-  row.images?.forEach(async (image) => {
-    await fileSystemService.unlink({ filepath: image });
+  (row.images as File[])?.forEach(async (image) => {
+    await fileSystemService.unlink({ filepath: image.src });
   });
 
   await db.delete(histories).where(eq(histories._id, _id));

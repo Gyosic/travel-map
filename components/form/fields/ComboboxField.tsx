@@ -48,7 +48,6 @@ export function ComboboxField<T extends FieldValues, K extends FieldPath<T>>({
         className="flex-1"
         contentCls="left-0"
         onValueChange={(v) => field.onChange(v)}
-        onBlur={field.onBlur}
       />
     </FormItemWrapper>
   );
