@@ -66,10 +66,15 @@ export function HistoryForm({ className, user_id }: HistoryFormProps) {
     }
   };
 
-  const { handleSubmit } = form;
+  const {
+    handleSubmit,
+    formState: { isSubmitting },
+  } = form;
 
   const onSubmit = handleSubmit(
     async (inputs: HistoryFormType) => {
+      if (isSubmitting) return;
+
       const formdata = new FormData();
 
       for (const [key, value] of Object.entries(inputs)) {
@@ -189,10 +194,15 @@ export function HistoryUpdateForm({ className, user_id, history }: HistoryUpdate
     }
   };
 
-  const { handleSubmit } = form;
+  const {
+    handleSubmit,
+    formState: { isSubmitting },
+  } = form;
 
   const onSubmit = handleSubmit(
     async (inputs: HistoryUpdateFormType) => {
+      if (isSubmitting) return;
+
       const formdata = new FormData();
 
       for (const [key, value] of Object.entries(inputs)) {
@@ -315,10 +325,15 @@ export function UnauthHistoryForm({ className }: UnauthHistoryFormProps) {
     }
   };
 
-  const { handleSubmit } = form;
+  const {
+    handleSubmit,
+    formState: { isSubmitting },
+  } = form;
 
   const onSubmit = handleSubmit(
     async (inputs: FormType) => {
+      if (isSubmitting) return;
+
       const formdata = new FormData();
 
       for (const [key, value] of Object.entries(inputs)) {
