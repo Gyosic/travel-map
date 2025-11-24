@@ -96,7 +96,10 @@ export function Feed({ sido_cd }: FeedProps) {
   useEffect(() => {
     if (session.status === "authenticated") getHistories();
     else {
-      const localHistories = JSON.parse(localStorage.getItem("histories") || "[]");
+      let localHistories = JSON.parse(localStorage.getItem("histories") || "[]");
+
+      if(sido) localHistories = localHistories.filter((history: HistoryType) => history.sido_cd === sido);
+      
       setData({ rows: localHistories, rowCount: localHistories.length });
     }
   }, [session, sido]);
