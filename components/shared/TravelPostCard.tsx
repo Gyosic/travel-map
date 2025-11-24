@@ -121,8 +121,10 @@ export function TravelPostCard({ history, onDelete }: TravelPostCardProps) {
           <CardContent className="relative w-full">
             <div className="flex flex-col items-center gap-2">
               <div className="flex w-full flex-wrap gap-2">
-                {history.tags.map((tag) => (
-                  <Badge variant="secondary">#{tag}</Badge>
+                {history.tags.map((tag, index) => (
+                  <Badge key={index} variant="secondary">
+                    #{tag}
+                  </Badge>
                 ))}
               </div>
             </div>
