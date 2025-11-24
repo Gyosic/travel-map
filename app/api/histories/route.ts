@@ -1,5 +1,4 @@
 import { and, ColumnDataType, count, eq, getTableColumns, Operators, sql } from "drizzle-orm";
-import { NextApiRequest } from "next";
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { db, selectQuerying } from "@/lib/pg";
@@ -20,7 +19,7 @@ type BodyType = {
   pagination?: { pageIndex: number; pageSize: number };
 };
 
-export async function POST(req: NextRequest & NextApiRequest) {
+export async function POST(req: NextRequest) {
   let body: BodyType = {};
   try {
     body = await req.json();
