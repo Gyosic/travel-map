@@ -342,7 +342,7 @@ export function UnauthHistoryForm({ className }: UnauthHistoryFormProps) {
         const history = await response.json();
 
         const localHistories = JSON.parse(localStorage.getItem("histories") || "[]");
-        localHistories.push(history);
+        localHistories.unshift(history);
 
         localStorage.setItem("histories", JSON.stringify(localHistories));
 
