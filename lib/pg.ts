@@ -133,7 +133,7 @@ type FilterType<T> = {
   or?: boolean;
 };
 
-interface QueryParams<T> {
+export interface QueryParams<T> {
   where?: FilterType<T>[];
   sort?: { id: keyof T; desc: boolean }[];
   pagination?: { pageIndex: number; pageSize: number };
