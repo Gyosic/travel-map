@@ -352,10 +352,6 @@ export const Navbar = React.forwardRef<HTMLElement, NavbarProps>(
                 notificationCount={notificationCount}
                 onItemClick={onNotificationItemClick}
               />
-              {/* <HistoryForm isDialog /> */}
-              <Button type="button" variant="ghost" onClick={() => router.push("/post")}>
-                <Plus />
-              </Button>
             </div>
             {/* User menu */}
             {status === "authenticated" ? (
