@@ -94,11 +94,9 @@ export function Feed({ sido_cd }: FeedProps) {
       setData({ rows: localHistories, rowCount: localHistories.length });
     }
   }, [session, sido]);
-  useEffect(() => {
-    console.info(data);
-  }, [data]);
+
   return (
-    <section className="container mx-auto max-w-4xl p-6">
+    <section className="container mx-auto h-full max-w-4xl flex-1 p-6">
       <div className="mb-6">
         <Button variant="ghost" onClick={() => router.back()}>
           <ArrowLeftIcon />

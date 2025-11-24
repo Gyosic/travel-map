@@ -2,22 +2,23 @@
 
 import { each, isNil } from "es-toolkit/compat";
 import maplibregl from "maplibre-gl";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
-import { Button } from "@/components/ui/button";
-import { AnimatedTestimonials } from "@/components/ui/shadcn-io/animated-testimonials";
 import { useSido } from "@/hooks/use-sido";
 import { cn } from "@/lib/utils";
 
-export default function TravelMap({ className }: { className?: string }) {
+interface TravelMapProps {
+  className?: string;
+}
+export default function TravelMap({ className }: TravelMapProps) {
   const session = useSession();
   const router = useRouter();
   const mapRef = useRef<maplibregl.Map>(null);
-  const popupRef = useRef<maplibregl.Popup | null>(null);
   const { setSidoList } = useSido();
-  const [markers, setMarkers] = useState<maplibregl.Marker[]>([]);
+  const [popups, setPopups] = useState<maplibregl.Popup[]>([]);
 
   const addInteractions = (sourceName: string) => {
     if (!mapRef.current) return;
@@ -65,7 +66,7 @@ export default function TravelMap({ className }: { className?: string }) {
   };
   const getHistories = useCallback(
     async (sidoGeojson: GeoJSON.FeatureCollection) => {
-      markers.forEach((m) => m.remove());
+      popups.forEach((p) => p.remove());
 
       const rows = [];
 
@@ -81,54 +82,48 @@ export default function TravelMap({ className }: { className?: string }) {
       }
 
       if (rows?.length > 0) {
-        const newMarkers: maplibregl.Marker[] = [];
+        const newPopups: maplibregl.Popup[] = [];
         each(rows, (row) => {
-          const marker = new maplibregl.Marker().setLngLat(row.lnglat).addTo(mapRef.current!);
-          newMarkers.push(marker);
+          const container = document.createElement("div");
+          container.className = "w-full h-full flex justify-center items-center";
 
-          const el = marker.getElement();
-          el.addEventListener("mouseenter", () => {
-            const container = document.createElement("div");
-            container.className = "w-full h-full";
+          const imageCnt = row.images.length;
+          const imageSrc = `/api/files${row.images[imageCnt - 1].src}`;
 
-            const testimonials = row.images.map(({ src }: { src: string }) => ({
-              src: `/api/files/${src}`,
-            }));
+          if (imageCnt > 0) {
+            const root = createRoot(container);
+            root.render(
+              <div className="relative flex h-full w-full items-center justify-center">
+                <Image
+                  key={row.id}
+                  src={imageSrc}
+                  alt={row.title}
+                  width={0}
+                  height={0}
+                  className="h-full w-full object-cover"
+                ></Image>
+                <div className="absolute z-50 flex h-full w-full flex-1 items-center justify-center font-bold text-primary-foreground">
+                  <span className="truncate">{imageCnt}</span>
+                </div>
+              </div>,
+            );
 
-            if (testimonials.length > 0) {
-              const root = createRoot(container);
-              root.render(
-                <AnimatedTestimonials
-                  className="h-full w-full bg-background/50 p-0 dark:bg-background-foreground/50"
-                  testimonials={testimonials}
-                  autoplay
-                  autoplayInterval={1000}
-                  enableBtn={false}
-                />,
-              );
+            const popup = new maplibregl.Popup({
+              className: "w-10 h-10 p-0",
+              closeButton: false,
+              closeOnClick: false,
+            }).setDOMContent(container);
 
-              const popup = new maplibregl.Popup({
-                className: "w-40 h-30 p-0",
-                closeButton: false,
-                closeOnClick: false,
-                offset: 40,
-              }).setDOMContent(container);
+            popup.on("close", () => {
+              root.unmount();
+            }); // 메모리 누수 방지
 
-              popup.on("close", () => {
-                root.unmount();
-              }); // 메모리 누수 방지
+            popup.setLngLat(row.lnglat).addTo(mapRef.current!);
 
-              popup.setLngLat(marker.getLngLat()).addTo(mapRef.current!);
-
-              popupRef.current = popup;
-            }
-          });
-
-          el.addEventListener("mouseleave", () => {
-            popupRef.current?.remove();
-          });
+            newPopups.push(popup);
+          }
+          setPopups(newPopups);
         });
-        setMarkers(newMarkers);
 
         const grouped: Record<string, { [key: string]: unknown }[]> = rows.reduce(
           (
@@ -157,6 +152,8 @@ export default function TravelMap({ className }: { className?: string }) {
           );
         });
       }
+
+      mapRef.current?.resize();
     },
     [session.status],
   );
@@ -263,18 +260,9 @@ export default function TravelMap({ className }: { className?: string }) {
     map.on("load", onLoadMap);
 
     mapRef.current = map;
+
+    map.resize();
   }, [session.status]);
 
-  return (
-    <div id="map" className={cn("relative h-full w-full", className)}>
-      <Button
-        type="button"
-        variant="outline"
-        className="absolute top-5 right-5 z-100"
-        onClick={() => router.push("/feed")}
-      >
-        전체보기
-      </Button>
-    </div>
-  );
+  return <div id="map" className={cn("relative h-full w-full", className)}></div>;
 }
