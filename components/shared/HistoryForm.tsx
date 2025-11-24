@@ -318,10 +318,10 @@ export function UnauthHistoryForm({ className }: UnauthHistoryFormProps) {
       form.setValue("sido_cd", data.bcode.slice(0, 2));
     }
     if (data.point?.x && data.point?.y) form.setValue("lnglat", [data.point.x, data.point.y]);
-    if (data.structure?.level4LC) {
-      form.setValue("emd_cd", data.structure.level4LC);
-      form.setValue("sgg_cd", data.structure.level4LC.slice(0, 5));
-      form.setValue("sido_cd", data.structure.level4LC.slice(0, 2));
+    if (data.structure?.level4AC) {
+      form.setValue("emd_cd", data.structure.level4AC);
+      form.setValue("sgg_cd", data.structure.level4AC.slice(0, 5));
+      form.setValue("sido_cd", data.structure.level4AC.slice(0, 2));
     }
   };
 
