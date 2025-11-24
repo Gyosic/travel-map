@@ -2,11 +2,11 @@
 
 import { BellIcon, ChevronDownIcon, HelpCircleIcon, Plus } from "lucide-react";
 // import dynamic from "next/dynamic";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { Session } from "next-auth";
 import { signOut, useSession } from "next-auth/react";
 import * as React from "react";
-import { useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { SigninForm } from "@/components/shared/SigninForm";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -180,7 +180,7 @@ const UserMenu = ({
   userAvatar?: string;
   onItemClick?: (item: string) => void;
 }) => {
-  const router = useRouter();
+  const pathname = usePathname();
   const user = useMemo(() => {
     if (!session) return null;
     return session.user;
@@ -219,8 +219,7 @@ const UserMenu = ({
         <DropdownMenuSeparator />
         <DropdownMenuItem
           onClick={() => {
-            signOut({ redirect: false });
-            router.refresh();
+            signOut({ redirectTo: pathname });
           }}
         >
           Log out
@@ -280,7 +279,8 @@ export const Navbar = React.forwardRef<HTMLElement, NavbarProps>(
     ref,
   ) => {
     const containerRef = useRef<HTMLElement>(null);
-    const session = useSession();
+    const { status, data: session } = useSession();
+    const hasSavedRef = useRef(false);
     const router = useRouter();
 
     // Combine refs
@@ -295,6 +295,24 @@ export const Navbar = React.forwardRef<HTMLElement, NavbarProps>(
       },
       [ref],
     );
+
+    const autosave = async () => {
+      const histories = localStorage.getItem("histories");
+      if (histories) {
+        const res = await fetch("/api/histories/autosave", {
+          method: "POST",
+          body: histories,
+        });
+
+        if (res.ok) localStorage.removeItem("histories");
+      }
+    };
+
+    useEffect(() => {
+      if (status !== "authenticated" || hasSavedRef.current) return;
+      hasSavedRef.current = true;
+      autosave();
+    }, [status]);
 
     return (
       <header
@@ -335,19 +353,13 @@ export const Navbar = React.forwardRef<HTMLElement, NavbarProps>(
                 onItemClick={onNotificationItemClick}
               />
               {/* <HistoryForm isDialog /> */}
-              {session.status === "authenticated" && (
-                <Button type="button" variant="ghost" onClick={() => router.push("/post")}>
-                  <Plus />
-                </Button>
-              )}
+              <Button type="button" variant="ghost" onClick={() => router.push("/post")}>
+                <Plus />
+              </Button>
             </div>
             {/* User menu */}
-            {session.status === "authenticated" ? (
-              <UserMenu
-                session={session.data}
-                userAvatar={userAvatar}
-                onItemClick={onUserItemClick}
-              />
+            {status === "authenticated" ? (
+              <UserMenu session={session} userAvatar={userAvatar} onItemClick={onUserItemClick} />
             ) : (
               <Dialog>
                 <DialogTrigger asChild>
