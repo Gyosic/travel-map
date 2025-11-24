@@ -88,7 +88,7 @@ export default function TravelMap({ className }: TravelMapProps) {
           container.className = "w-full h-full flex justify-center items-center";
 
           const imageCnt = row.images?.length ?? 0;
-          const imageSrc = `/api/files${row.images?.[imageCnt - 1].src}`;
+          const imageSrc = `/api/files${row.images?.[imageCnt - 1]?.src}`;
 
           if (imageCnt > 0) {
             const root = createRoot(container);

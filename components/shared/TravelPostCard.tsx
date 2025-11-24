@@ -7,6 +7,7 @@ import { useSession } from "next-auth/react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { StarButton } from "@/components/shared/StarButton";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import {
@@ -23,6 +24,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Separator } from "@/components/ui/separator";
 import type { FileType } from "@/lib/schema/file";
 // import { AnimatedTestimonials } from "@/components/ui/shadcn-io/animated-testimonials";
 import { HistoryType } from "@/lib/schema/history.schema";
@@ -113,6 +115,22 @@ export function TravelPostCard({ history, onDelete }: TravelPostCardProps) {
       <CardContent className="relative w-full">
         <p className="text-muted-foreground">{history.content}</p>
       </CardContent>
+      {!!history?.tags?.length && (
+        <>
+          <Separator />
+          <CardContent className="relative w-full">
+            <div className="flex flex-col items-center gap-2">
+              <div className="flex w-full flex-wrap gap-2">
+                {history.tags.map((tag, index) => (
+                  <Badge key={index} variant="secondary">
+                    #{tag}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+          </CardContent>
+        </>
+      )}
 
       {/* <CardFooter className="border-t pt-4">
         <span className="text-muted-foreground">작성자: {post.author}</span>
