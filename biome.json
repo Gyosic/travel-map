@@ -16,14 +16,6 @@
       "!components/bits/**",
       "!hooks/use-mobile.ts",
       "!ecosystem.config.js"
-    ],
-    "experimentalScannerIgnores": [
-      ".next",
-      ".git",
-      ".husky",
-      "components/ui",
-      "components/bits",
-      "ecosystem.config.js"
     ]
   },
   "formatter": {
