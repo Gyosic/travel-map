@@ -1,7 +1,7 @@
 "use client";
 
 import { BellIcon, ChevronDownIcon, HelpCircleIcon, Plus } from "lucide-react";
-// import dynamic from "next/dynamic";
+import dynamic from "next/dynamic";
 import { usePathname, useRouter } from "next/navigation";
 import { Session } from "next-auth";
 import { signOut, useSession } from "next-auth/react";
@@ -29,10 +29,10 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 
-// const ThemeToggler = dynamic(
-//   () => import("@/components/shared/ThemeToggler").then((module) => module.ThemeToggler),
-//   { ssr: false },
-// );
+const ThemeToggler = dynamic(
+  () => import("@/components/shared/ThemeToggler").then((module) => module.ThemeToggler),
+  { ssr: false },
+);
 
 // Simple logo component for the navbar
 const Logo = (props: React.SVGAttributes<SVGElement>) => {
@@ -344,7 +344,7 @@ export const Navbar = React.forwardRef<HTMLElement, NavbarProps>(
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2">
               {/* Theme toggler */}
-              {/* <ThemeToggler /> */}
+              <ThemeToggler />
               {/* Info menu */}
               <InfoMenu onItemClick={onInfoItemClick} />
               {/* Notification */}
