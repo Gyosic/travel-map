@@ -2,6 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Eye, EyeClosed } from "lucide-react";
+import Link from "next/link";
 // import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
@@ -149,12 +150,17 @@ export function SigninForm({ callbackUrl }: SigninFormProps) {
             )}
           />
           <div className="ml-auto flex gap-2">
-            <Checkbox
-              id="remember"
-              checked={remember}
-              onCheckedChange={handleChangeRemember}
-            ></Checkbox>
-            <Label htmlFor="remember">아이디 기억하기</Label>
+            <div className="flex items-center gap-2">
+              <Checkbox
+                id="remember"
+                checked={remember}
+                onCheckedChange={handleChangeRemember}
+              ></Checkbox>
+              <Label htmlFor="remember">아이디 기억하기</Label>
+            </div>
+            <Link href="/signup" className="text-blue-500 text-sm">
+              회원가입
+            </Link>
           </div>
 
           <div className="flex flex-col gap-2">

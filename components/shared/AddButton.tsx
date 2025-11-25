@@ -14,7 +14,10 @@ export function AddButton() {
     <Button
       type="button"
       size="icon"
-      className={cn("fixed right-5 bottom-25 z-50 rounded-full shadow-lg", isPostPage && "hidden")}
+      className={cn(
+        "absolute right-5 bottom-25 z-50 rounded-full shadow-lg",
+        isPostPage && "hidden",
+      )}
       onClick={() => router.push("/post")}
     >
       <Plus className="" />

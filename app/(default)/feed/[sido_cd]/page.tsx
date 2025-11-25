@@ -1,4 +1,4 @@
-import { Feed } from "@/app/feed/Feed";
+import { Feed } from "@/app/(default)/feed/Feed";
 
 type Params = { sido_cd: string };
 
