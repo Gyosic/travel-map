@@ -366,9 +366,6 @@ export const Navbar = React.forwardRef<HTMLElement, NavbarProps>(
                 <DialogContent className="sm:max-w-[425px]">
                   <DialogHeader>
                     <DialogTitle>로그인</DialogTitle>
-                    <DialogDescription>
-                      이메일 형식의 아이디와 비밀번호를 입력하세요.
-                    </DialogDescription>
                   </DialogHeader>
                   <SigninForm />
                 </DialogContent>
