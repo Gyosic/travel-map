@@ -206,20 +206,19 @@ export function GoogleButton({
   switch (appearance) {
     case "standard":
       return (
-        <button
+        <Button
           className={cn("gsi-material-button rounded-sm border p-2", className)}
           type="button"
           {...props}
         >
-          <div className="gsi-material-button-state"></div>
           <div className="gsi-material-button-content-wrapper flex items-center justify-center gap-2">
-            <div className="gsi-material-button-icon size-5">
+            <div className="gsi-material-button-icon size-4">
               <svg
                 version="1.1"
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 48 48"
                 xmlnsXlink="http://www.w3.org/1999/xlink"
-                style={{ display: "block" }}
+                className="block"
               >
                 <path
                   fill="#EA4335"
@@ -240,21 +239,21 @@ export function GoogleButton({
                 <path fill="none" d="M0 0h48v48H0z"></path>
               </svg>
             </div>
-            <span className="gsi-material-button-contents">{text}</span>
-            <span style={{ display: "none" }}>{text}</span>
+            <span className="">{text}</span>
+            <span className="hidden">{text}</span>
           </div>
-        </button>
+        </Button>
       );
     case "icon":
       return (
-        <button
+        <Button
           type="button"
           className={cn("gsi-material-button size-10 rounded-sm border p-2", className)}
           {...props}
         >
           <div className="gsi-material-button-state"></div>
           <div className="gsi-material-button-content-wrapper">
-            <div className="gsi-material-button-icon size-5">
+            <div className="gsi-material-button-icon size-4">
               <svg
                 version="1.1"
                 xmlns="http://www.w3.org/2000/svg"
@@ -281,39 +280,66 @@ export function GoogleButton({
                 <path fill="none" d="M0 0h48v48H0z"></path>
               </svg>
             </div>
-            <span style={{ display: "none" }}>{text}</span>
+            <span className="hidden">{text}</span>
           </div>
-        </button>
-      );
-  }
-}
-
-/* TODO  
-  1. appearance 에 따라 버튼 모양 변경
-  2. theme 상태에 따라 버튼 색깔 변경
-*/
-import Image from "next/image";
-import NaverIconDark from "@/public/naver-icon-dark.png";
-import NaverIconGreen from "@/public/naver-icon-green.png";
-import NaverStandardDark from "@/public/naver-standard-dark.png";
-import NaverStandardGreen from "@/public/naver-standard-green.png";
-
-interface NaverButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  appearance?: "standard" | "icon";
-}
-export function NaverButton({ appearance = "standard", className, ...props }: NaverButtonProps) {
-  switch (appearance) {
-    case "standard":
-      return (
-        <Button type="button" variant="ghost" className={cn("border p-0", className)} {...props}>
-          <Image
-            src={NaverStandardGreen}
-            alt="Naver"
-            className="h-full w-full object-contain"
-            width={100}
-            height={100}
-          />
         </Button>
       );
   }
+}
+
+import Image from "next/image";
+import { useTheme } from "next-themes";
+import NaverIconDark from "@/public/naver-icon-dark.png";
+import NaverIconGreen from "@/public/naver-icon-green.png";
+
+interface NaverButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+  appearance?: "standard" | "icon";
+  text?: string;
+}
+export function NaverButton({
+  appearance = "standard",
+  text = "Sign in with Naver",
+  className,
+  ...props
+}: NaverButtonProps) {
+  const { theme } = useTheme();
+
+  const imgSrc = theme === "dark" ? NaverIconDark : NaverIconGreen;
+
+  return (
+    <Button
+      type="button"
+      variant="ghost"
+      className={cn(
+        `flex w-full items-center justify-center gap-0 border-0 bg-[#03c75a] p-0 hover:bg-[#03c75a] dark:bg-[#48484a] dark:hover:bg-[#48484a]`,
+        className,
+      )}
+      {...props}
+    >
+      {theme === "dark" ? (
+        <div className="flex h-8 w-8 items-center justify-center overflow-hidden">
+          <Image
+            src={imgSrc}
+            className="h-9 w-9 object-cover"
+            alt="Naver"
+            width={48}
+            height={48}
+            quality={100}
+          />
+        </div>
+      ) : (
+        <div className="flex h-8 w-8 items-center justify-center">
+          <Image
+            src={imgSrc}
+            className="h-9 w-9 object-cover"
+            alt="Naver"
+            width={48}
+            height={48}
+            quality={100}
+          />
+        </div>
+      )}
+      {appearance === "standard" && <span className="text-white">{text}</span>}
+    </Button>
+  );
 }

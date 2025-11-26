@@ -7,11 +7,10 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { TemplateFormItem } from "@/components/form/TemplateFormItem";
-import { GoogleButton } from "@/components/shared/SigninForm";
+import { GoogleButton, NaverButton } from "@/components/shared/SigninForm";
 import { Button } from "@/components/ui/button";
-import { Field, FieldDescription, FieldGroup } from "@/components/ui/field";
+import { Field, FieldDescription, FieldGroup, FieldSeparator } from "@/components/ui/field";
 import { Form, FormField } from "@/components/ui/form";
-import { Separator } from "@/components/ui/separator";
 import { UserFormType, userFormModel, userFormSchema } from "@/lib/schema/user.schema";
 
 export function SignupForm() {
@@ -82,15 +81,20 @@ export function SignupForm() {
                 />
               );
             })}
-            <Separator />
             <FieldGroup>
               <Field>
                 <Button type="submit">회원가입</Button>
+                <FieldSeparator>or</FieldSeparator>
                 <GoogleButton
                   type="button"
                   text="Sign up with Google"
                   className="py-1"
                   onClick={() => signIn("google")}
+                />
+                <NaverButton
+                  type="button"
+                  text="Sign up with Naver"
+                  onClick={() => signIn("naver")}
                 />
                 <FieldDescription className="px-6 text-center">
                   Already have an account? <a href="#">Sign in</a>
