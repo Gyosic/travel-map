@@ -2,8 +2,6 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Eye, EyeClosed } from "lucide-react";
-import Link from "next/link";
-// import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { ButtonHTMLAttributes, useEffect, useState } from "react";
@@ -28,10 +26,12 @@ import { cn } from "@/lib/utils";
 
 interface SigninFormProps {
   callbackUrl?: string;
+  isDialog?: boolean;
 }
 
-export function SigninForm({ callbackUrl }: SigninFormProps) {
+export function SigninForm({ callbackUrl, isDialog = false }: SigninFormProps) {
   const router = useRouter();
+  const [open, setOpen] = useState<boolean>(false);
 
   const credentialSchema = z.object({
     email: z.string().min(1, {
@@ -96,7 +96,7 @@ export function SigninForm({ callbackUrl }: SigninFormProps) {
     }
   }, []);
 
-  return (
+  const FormComponent = () => (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-8">
         <div className="grid gap-4">
@@ -165,9 +165,17 @@ export function SigninForm({ callbackUrl }: SigninFormProps) {
               ></Checkbox>
               <Label htmlFor="remember">아이디 기억하기</Label>
             </div>
-            <Link href="/signup" className="text-blue-500 text-sm">
+            <Button
+              type="button"
+              variant="link"
+              className="text-blue-500 text-sm"
+              onClick={() => {
+                setOpen(false);
+                router.push("/signup");
+              }}
+            >
               회원가입
-            </Link>
+            </Button>
           </div>
 
           <div className="flex flex-col gap-2">
@@ -190,6 +198,24 @@ export function SigninForm({ callbackUrl }: SigninFormProps) {
         </div>
       </form>
     </Form>
+  );
+
+  return isDialog ? (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button type="button" variant="ghost">
+          로그인
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle>로그인</DialogTitle>
+        </DialogHeader>
+        <FormComponent />
+      </DialogContent>
+    </Dialog>
+  ) : (
+    <FormComponent />
   );
 }
 
@@ -289,6 +315,13 @@ export function GoogleButton({
 
 import Image from "next/image";
 import { useTheme } from "next-themes";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import NaverIconDark from "@/public/naver-icon-dark.png";
 import NaverIconGreen from "@/public/naver-icon-green.png";
 

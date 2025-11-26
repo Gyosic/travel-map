@@ -12,14 +12,6 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -357,19 +349,7 @@ export const Navbar = React.forwardRef<HTMLElement, NavbarProps>(
             {status === "authenticated" ? (
               <UserMenu session={session} userAvatar={userAvatar} onItemClick={onUserItemClick} />
             ) : (
-              <Dialog>
-                <DialogTrigger asChild>
-                  <Button type="button" variant="ghost">
-                    로그인
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="sm:max-w-[425px]">
-                  <DialogHeader>
-                    <DialogTitle>로그인</DialogTitle>
-                  </DialogHeader>
-                  <SigninForm />
-                </DialogContent>
-              </Dialog>
+              <SigninForm isDialog />
             )}
           </div>
         </div>
