@@ -1,4 +1,4 @@
-import { boolean, integer, pgTable, primaryKey, text, timestamp } from "drizzle-orm/pg-core";
+import { integer, pgTable, primaryKey, text, timestamp } from "drizzle-orm/pg-core";
 import { AdapterAccountType } from "next-auth/adapters";
 
 // drizzle table 정의
@@ -8,12 +8,12 @@ export const users = pgTable("users", {
     .$defaultFn(() => crypto.randomUUID()),
   name: text().notNull(),
   email: text().notNull().unique(),
-  emailVerified: timestamp({ mode: "date" }),
+  emailVerified: timestamp({ withTimezone: true }),
   image: text(),
   password: text(),
   salt: text(),
-  created_at: timestamp().defaultNow(),
-  updated_at: timestamp(),
+  created_at: timestamp({ withTimezone: true }).defaultNow(),
+  updated_at: timestamp({ withTimezone: true }),
 });
 
 export const accounts = pgTable(
@@ -37,29 +37,6 @@ export const accounts = pgTable(
     {
       compoundKey: primaryKey({
         columns: [account.provider, account.providerAccountId],
-      }),
-    },
-  ],
-);
-
-export const authenticators = pgTable(
-  "authenticator",
-  {
-    credentialID: text().notNull().unique(),
-    userId: text()
-      .notNull()
-      .references(() => users.id, { onDelete: "cascade" }),
-    providerAccountId: text().notNull(),
-    credentialPublicKey: text().notNull(),
-    counter: integer().notNull(),
-    credentialDeviceType: text().notNull(),
-    credentialBackedUp: boolean().notNull(),
-    transports: text(),
-  },
-  (authenticator) => [
-    {
-      compositePK: primaryKey({
-        columns: [authenticator.userId, authenticator.credentialID],
       }),
     },
   ],
