@@ -44,38 +44,46 @@ export async function POST(req: NextRequest) {
   if (!rows.length) {
     // 시스템관리자 확인
     if (sysadmin.email !== email) {
-      return NextResponse.json({
-        error: {
-          status: 400,
-          message: "로그인에 실패하였습니다. 아이디 또는 비밀번호를 확인해주세요.",
-        },
+      return NextResponse.json("로그인에 실패하였습니다. 아이디 또는 비밀번호를 확인해주세요.", {
+        status: 400,
       });
     }
     rows.push(sysadmin);
   }
 
-  const [{ id: userId, salt, password: userPassword, ...properties } = {}] = rows;
+  const [{ id: userId, salt, password: userPassword, emailVerified, ...properties } = {}] = rows;
+
+  if (!!userId && !userPassword) {
+    return NextResponse.json("해당 이메일로 간편 로그인 후 비밀번호를 설정해주세요.", {
+      status: 400,
+    });
+  }
 
   if (userPassword !== hmacEncrypt(password, salt!)) {
     const toDay = new Date();
     const data = `${toDay.getFullYear()}-${toDay.getMonth() + 1}-${toDay.getDate()}-magic`;
 
     if (password !== getHash(data))
-      return NextResponse.json({
-        error: {
-          status: 400,
-          message: "로그인에 실패하였습니다. 아이디 또는 비밀번호를 확인해주세요.",
-        },
+      return NextResponse.json("로그인에 실패하였습니다. 아이디 또는 비밀번호를 확인해주세요.", {
+        status: 400,
       });
   }
 
+  // 이메일 인증 확인 (자체 가입 사용자만, OAuth는 자동 인증됨)
+  if (!emailVerified && userId !== "sysadmin") {
+    return NextResponse.json("이메일 인증이 필요합니다. 가입 시 받은 인증 메일을 확인해주세요.", {
+      status: 403,
+    });
+  }
+
   const userSession = {
-    _id: userId,
+    id: userId,
     email,
     ip:
       req?.headers?.get("x-forwarded-for")?.split(",")[0]?.trim() ||
       req.headers.get("x-real-ip") ||
       "127.0.0.1",
+    emailVerified,
     ...properties,
     lastSigninTime: date(new Date(), { type: "ymd hms" }),
   };

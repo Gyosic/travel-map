@@ -3,9 +3,8 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Eye, EyeClosed } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { signIn } from "next-auth/react";
+import { signIn, useSession } from "next-auth/react";
 import { ButtonHTMLAttributes, useEffect, useState } from "react";
-import { useCookies } from "react-cookie";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -32,6 +31,7 @@ interface SigninFormProps {
 export function SigninForm({ callbackUrl, isDialog = false }: SigninFormProps) {
   const router = useRouter();
   const [open, setOpen] = useState<boolean>(false);
+  const { update } = useSession();
 
   const credentialSchema = z.object({
     email: z.string().min(1, {
@@ -43,16 +43,30 @@ export function SigninForm({ callbackUrl, isDialog = false }: SigninFormProps) {
   });
 
   const [visiblePassword, setVisiblePassword] = useState<boolean>(false);
-  const [remember, setRemember] = useState<boolean>(() => {
-    if (typeof window === "undefined") return false;
-    return localStorage.getItem("remember") === "true";
-  });
-  const [cookies] = useCookies(["auth_error"]);
+  const [remember, setRemember] = useState<boolean>(false);
 
   const form = useForm<z.infer<typeof credentialSchema>>({
     resolver: zodResolver(credentialSchema),
-    defaultValues: { email: "", password: "" },
+    defaultValues: {
+      email: "",
+      password: "",
+    },
   });
+
+  // localStorage에서 저장된 값 불러오기 (클라이언트에서만 실행)
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const isRemembered = localStorage.getItem("remember") === "true";
+      setRemember(isRemembered);
+
+      if (isRemembered) {
+        const savedEmail = localStorage.getItem("rememberUsername");
+        if (savedEmail) {
+          form.reset({ email: savedEmail, password: "" });
+        }
+      }
+    }
+  }, []);
 
   // 2. Define a submit handler.
   const handleSubmit = async (inputs: z.infer<typeof credentialSchema>) => {
@@ -60,14 +74,11 @@ export function SigninForm({ callbackUrl, isDialog = false }: SigninFormProps) {
     // ✅ This will be type-safe and validated.
 
     try {
-      const res = await signIn("credentials", {
-        ...inputs,
-        redirect: false,
-      });
+      const res = await login(inputs.email, inputs.password);
 
       if (res.error) {
         return toast("[로그인]", {
-          description: cookies.auth_error || "로그인에 실패하였습니다.",
+          description: res.error.message || "로그인에 실패하였습니다. 다시 시도해주세요.",
           position: "top-right",
         });
       }
@@ -80,28 +91,28 @@ export function SigninForm({ callbackUrl, isDialog = false }: SigninFormProps) {
         localStorage.removeItem("remember");
       }
 
-      if (callbackUrl) return router.push(callbackUrl);
+      if (isDialog) setOpen(false);
+
+      // 세션 강제 업데이트 - 서버에서 세션이 변경되었음을 클라이언트에 알림
+      await update();
+
+      form.reset();
     } catch {}
   };
   const handleChangeRemember = (isRemember: boolean) => {
     setRemember(isRemember);
   };
 
-  useEffect(() => {
-    const email = localStorage.getItem("rememberUsername");
-    const remember = localStorage.getItem("remember") === "true";
-
-    if (email && remember) {
-      form.setValue("email", email);
-    }
-  }, []);
+  const oauthSignin = async (provider: "google" | "naver") => {
+    signIn(provider);
+  };
 
   const FormComponent = () => (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-8">
         <div className="grid gap-4">
-          <GoogleButton type="button" onClick={() => signIn("google")} />
-          <NaverButton type="button" onClick={() => signIn("naver")} />
+          <GoogleButton type="button" onClick={() => oauthSignin("google")} />
+          <NaverButton type="button" onClick={() => oauthSignin("naver")} />
           <FieldSeparator className="*:data-[slot=field-separator-content]:bg-card">
             or
           </FieldSeparator>
@@ -111,7 +122,7 @@ export function SigninForm({ callbackUrl, isDialog = false }: SigninFormProps) {
             render={({ field }) => (
               <FormItem>
                 <div className="flex flex-col gap-2">
-                  <FormLabel className="w-auto">계정 ID</FormLabel>
+                  <FormLabel className="w-auto">Email 계정</FormLabel>
                   <FormControl>
                     <div className="flex w-full">
                       <Input className="bg-white" placeholder={"user@example.com"} {...field} />
@@ -133,7 +144,6 @@ export function SigninForm({ callbackUrl, isDialog = false }: SigninFormProps) {
                   <FormControl>
                     <div className="flex w-full items-center gap-2">
                       <Input
-                        id="current-password"
                         className="bg-white"
                         type={visiblePassword ? "text" : "password"}
                         placeholder="********"
@@ -322,6 +332,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { login } from "@/lib/auth/actions";
 import NaverIconDark from "@/public/naver-icon-dark.png";
 import NaverIconGreen from "@/public/naver-icon-green.png";
 

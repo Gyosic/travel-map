@@ -12,6 +12,8 @@ declare module "next-auth" {
     is_sysadmin?: boolean;
     ip?: string;
     picture?: string;
+    email: string;
+    emailVerified?: Date;
   }
 
   interface Session {

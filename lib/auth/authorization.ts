@@ -1,6 +1,16 @@
 import { cookies } from "next/headers";
-import type { User } from "next-auth";
+import { CredentialsSignin, type User } from "next-auth";
 import { site } from "@/config";
+
+class CustomCredentialsSignin extends CredentialsSignin {
+  code: string;
+
+  constructor(message: string, code?: string) {
+    super();
+    this.message = message;
+    this.code = code || "credentials_error";
+  }
+}
 
 export const authorize = async (credentials: Partial<Record<"email" | "password", unknown>>) => {
   const signinRes = await fetch(new URL("/api/signin", site.baseurl), {
@@ -12,21 +22,12 @@ export const authorize = async (credentials: Partial<Record<"email" | "password"
     }),
   });
 
-  if (!signinRes.ok) throw new Error(await signinRes.text());
-
-  const { user, error } = await signinRes.json();
-
-  // new Error()를 해도 client에서는 Error 메시지를 받을 수 없으므로 cookies에 저장하고, client에서 읽은 뒤 삭제하는 방식으로 로그인 에러 메시지를 처리
-  const cookieStore = await cookies();
-  if (error) {
-    const { message } = error;
-    cookieStore.set("auth_error", message);
-
-    return null;
+  if (!signinRes.ok) {
+    const errorText = await signinRes.text();
+    throw new CustomCredentialsSignin(errorText);
   }
 
-  // 로그인 성공시 쿠키 삭제
-  cookieStore.set("auth_error", "", { maxAge: 0 });
+  const { user } = await signinRes.json();
 
   return user as User;
 };
