@@ -208,7 +208,10 @@ export function HistoryUpdateForm({ className, user_id, history }: HistoryUpdate
       for (const [key, value] of Object.entries(inputs)) {
         if (Array.isArray(value)) {
           if (value.some((item) => item instanceof File)) {
-            value.filter(Boolean).forEach((file) => formdata.append(key, file as File | string));
+            value.filter(Boolean).forEach((file) => {
+              if (file instanceof File) formdata.append(key, file as File);
+              else formdata.append(key, JSON.stringify(file));
+            });
           } else formdata.append(key, JSON.stringify(value));
         } else {
           if (!isNil(value)) formdata.append(key, value as string);

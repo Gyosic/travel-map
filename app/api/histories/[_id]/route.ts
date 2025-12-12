@@ -4,6 +4,7 @@ import { z } from "zod";
 import { auth } from "@/lib/auth";
 import FileSystem from "@/lib/fileSystem";
 import { writeDb as db } from "@/lib/pg";
+import { FileType } from "@/lib/schema/file";
 import { historyFormSchema } from "@/lib/schema/history.schema";
 import { histories } from "@/lib/schema/history.table";
 
@@ -87,7 +88,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<Params
       .parseAsync(history);
 
     let result;
-    const files: string[] = [];
+    const files: FileType[] = [];
 
     try {
       await db.transaction(async (tx) => {
@@ -95,9 +96,15 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<Params
           const buffer = await image.arrayBuffer();
 
           const filename = fileSystemService.genFilename();
-          const filepath = `/${storageName}/${filename}`;
-          files.push(filepath);
-          await fileSystemService.write({ filepath, content: Buffer.from(buffer) });
+          const src = `/${storageName}/${filename}`;
+          files.push({
+            name: image.name,
+            lastModified: image.lastModified,
+            type: image.type,
+            size: image.size,
+            src,
+          });
+          await fileSystemService.write({ filepath: src, content: Buffer.from(buffer) });
         }
 
         const rows = await tx
@@ -112,8 +119,8 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<Params
       // If transaction fails, clean up the uploaded file
       if (files.length > 0) {
         try {
-          for (const filename of files) {
-            await fileSystemService.unlink({ filepath: filename });
+          for (const { src } of files) {
+            await fileSystemService.unlink({ filepath: src });
           }
         } catch (unlinkError) {
           console.error("Failed to cleanup file:", unlinkError);
