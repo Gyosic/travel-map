@@ -28,10 +28,15 @@ export function SignupForm() {
     2. 메일 확인 로직 구현
     3. Oauth 계정 연동 로직 구현
   */
-  const onSubmit = handleSubmit((data: UserFormType) => {
+  const onSubmit = handleSubmit(async (data: UserFormType) => {
     if (isDuplicate) return toast.error("중복검사를 진행해주세요.");
 
-    console.log(data);
+    const res = await fetch("/api/users/signup", { method: "POST", body: JSON.stringify(data) });
+
+    if (!res.ok) return toast.error("회원가입에 실패하였습니다. 다시 시도해주세요.");
+
+    toast.success("회원가입이 완료되었습니다. 메일 인증 완료 후 로그인해주세요.");
+    router.push("/");
   });
 
   const onDuplicateCheck = async (key: keyof UserFormType, value: string) => {
