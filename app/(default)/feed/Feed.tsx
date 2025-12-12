@@ -98,8 +98,9 @@ export function Feed({ sido_cd }: FeedProps) {
     else {
       let localHistories = JSON.parse(localStorage.getItem("histories") || "[]");
 
-      if(sido) localHistories = localHistories.filter((history: HistoryType) => history.sido_cd === sido);
-      
+      if (sido)
+        localHistories = localHistories.filter((history: HistoryType) => history.sido_cd === sido);
+
       setData({ rows: localHistories, rowCount: localHistories.length });
     }
   }, [session, sido]);
@@ -116,6 +117,7 @@ export function Feed({ sido_cd }: FeedProps) {
             <p className="mt-1 text-muted-foreground text-sm">아름다웠던 추억을 회상해 보세요.</p>
           </div>
           <Combobox
+            className="w-40"
             items={sidoList}
             value={sido}
             onValueChange={(value) => setSido(value as string)}

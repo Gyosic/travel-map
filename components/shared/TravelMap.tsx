@@ -115,7 +115,8 @@ export default function TravelMap({ className }: TravelMapProps) {
             }).setDOMContent(container);
 
             popup.on("close", () => {
-              root.unmount();
+              // 비동기로 unmount하여 React 렌더링 충돌 방지
+              setTimeout(() => root?.unmount(), 0);
             }); // 메모리 누수 방지
 
             popup.setLngLat(row.lnglat).addTo(mapRef.current!);
@@ -247,7 +248,7 @@ export default function TravelMap({ className }: TravelMapProps) {
   }, [session.status]);
 
   useEffect(() => {
-    if (mapRef.current || session.status === "loading") return;
+    if (session.status === "loading") return;
 
     const map = new maplibregl.Map({
       container: "map",
@@ -262,6 +263,8 @@ export default function TravelMap({ className }: TravelMapProps) {
     mapRef.current = map;
 
     map.resize();
+
+    return () => mapRef.current?.remove();
   }, [session.status]);
 
   return <div id="map" className={cn("relative h-full w-full", className)}></div>;

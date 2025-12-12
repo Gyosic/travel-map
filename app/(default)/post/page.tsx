@@ -1,8 +1,10 @@
-import { HistoryForm, UnauthHistoryForm } from "@/components/shared/HistoryForm";
-import { auth } from "@/lib/auth";
+"use client";
 
-export default async function PostPage() {
-  const session = await auth();
+import { useSession } from "next-auth/react";
+import { HistoryForm, UnauthHistoryForm } from "@/components/shared/HistoryForm";
+
+export default function PostPage() {
+  const { data: session } = useSession();
 
   return session ? <HistoryForm user_id={session.user.id as string} /> : <UnauthHistoryForm />;
 }

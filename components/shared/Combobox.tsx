@@ -118,7 +118,7 @@ export default function Combobox<T extends Item>({
         </Button>
       </PopoverTrigger>
       <PopoverContent
-        className={cn(contentCls, "w-[(--radix-popover-trigger-width)] p-0")}
+        className={cn(contentCls, "w-[var(--radix-popover-trigger-width)] p-0")}
         align="start"
         onWheel={(e) => e.stopPropagation()}
         onTouchMove={(e) => e.stopPropagation()}
