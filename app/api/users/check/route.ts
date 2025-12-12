@@ -26,3 +26,15 @@ export async function GET(req: NextRequest) {
 
   return NextResponse.json(user);
 }
+
+export async function POST(req: NextRequest) {
+  const { email, type } = await req.json();
+
+  if (type === "first-oauth-login") {
+    const [user] = await db.select().from(users).where(eq(users.email, email));
+
+    return NextResponse.json(!!user.password);
+  }
+
+  return NextResponse.json(false);
+}

@@ -1,16 +1,26 @@
 "use client";
 
-import { BellIcon, ChevronDownIcon, HelpCircleIcon, Plus } from "lucide-react";
+import { BellIcon, ChevronDownIcon, HelpCircleIcon } from "lucide-react";
 import dynamic from "next/dynamic";
+import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { Session } from "next-auth";
 import { signOut, useSession } from "next-auth/react";
 import * as React from "react";
 import { useEffect, useMemo, useRef } from "react";
+import { PasswordForm } from "@/components/shared/PasswordForm";
 import { SigninForm } from "@/components/shared/SigninForm";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -20,6 +30,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
+import logo from "@/public/logo.png";
 
 const ThemeToggler = dynamic(
   () => import("@/components/shared/ThemeToggler").then((module) => module.ThemeToggler),
@@ -27,36 +38,8 @@ const ThemeToggler = dynamic(
 );
 
 // Simple logo component for the navbar
-const Logo = (props: React.SVGAttributes<SVGElement>) => {
-  return (
-    <svg
-      width="1em"
-      height="1em"
-      viewBox="0 0 324 323"
-      fill="currentColor"
-      xmlns="http://www.w3.org/2000/svg"
-      {...props}
-    >
-      <rect
-        x="88.1023"
-        y="144.792"
-        width="151.802"
-        height="36.5788"
-        rx="18.2894"
-        transform="rotate(-38.5799 88.1023 144.792)"
-        fill="currentColor"
-      />
-      <rect
-        x="85.3459"
-        y="244.537"
-        width="151.802"
-        height="36.5788"
-        rx="18.2894"
-        transform="rotate(-38.5799 85.3459 244.537)"
-        fill="currentColor"
-      />
-    </svg>
-  );
+const Logo = () => {
+  return <Image src={logo} alt="Logo" width={0} height={0} className="size-8" />;
 };
 
 // Hamburger icon component
@@ -164,19 +147,21 @@ const NotificationMenu = ({
 const UserMenu = ({
   session,
   userAvatar,
-  onItemClick,
 }: {
   session: Session;
   userName?: string;
   userEmail?: string;
   userAvatar?: string;
-  onItemClick?: (item: string) => void;
 }) => {
   const pathname = usePathname();
+  const [dialog, setDialog] = React.useState<{ [key: string]: boolean }>({ password: false });
   const user = useMemo(() => {
     if (!session) return null;
     return session.user;
   }, [session]);
+  const onItemClick = (item: string) => {
+    setDialog({ ...dialog, [item]: true });
+  };
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -205,9 +190,9 @@ const UserMenu = ({
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={() => onItemClick?.("profile")}>Profile</DropdownMenuItem>
-        <DropdownMenuItem onClick={() => onItemClick?.("settings")}>Settings</DropdownMenuItem>
-        <DropdownMenuItem onClick={() => onItemClick?.("billing")}>Billing</DropdownMenuItem>
+        <DropdownMenuItem onClick={() => onItemClick("profile")}>Profile</DropdownMenuItem>
+        <DropdownMenuItem onClick={() => onItemClick("password")}>비밀번호 변경</DropdownMenuItem>
+        <DropdownMenuItem onClick={() => onItemClick("billing")}>Billing</DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem
           onClick={() => {
@@ -217,6 +202,23 @@ const UserMenu = ({
           Log out
         </DropdownMenuItem>
       </DropdownMenuContent>
+
+      <Dialog
+        open={dialog.password}
+        onOpenChange={(open) => setDialog({ ...dialog, password: open })}
+      >
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>비밀번호 변경</DialogTitle>
+            <DialogDescription>변경에 성공하면 자동 로그아웃됩니다.</DialogDescription>
+          </DialogHeader>
+
+          <PasswordForm
+            email={user?.email!}
+            // onSubmit={() => setDialog({ ...dialog, password: false })}
+          />
+        </DialogContent>
+      </Dialog>
     </DropdownMenu>
   );
 };
@@ -239,7 +241,6 @@ export interface NavbarProps extends React.HTMLAttributes<HTMLElement> {
   onNavItemClick?: (href: string) => void;
   onInfoItemClick?: (item: string) => void;
   onNotificationItemClick?: (item: string) => void;
-  onUserItemClick?: (item: string) => void;
 }
 
 // Default navigation links
@@ -255,7 +256,7 @@ export const Navbar = React.forwardRef<HTMLElement, NavbarProps>(
     {
       className,
       logo = <Logo />,
-      title = "지도",
+      title = "Travel Story",
       //   logoHref = "#",
       navigationLinks = defaultNavigationLinks,
       // userName = "John Doe",
@@ -265,7 +266,6 @@ export const Navbar = React.forwardRef<HTMLElement, NavbarProps>(
       onNavItemClick,
       onInfoItemClick,
       onNotificationItemClick,
-      onUserItemClick,
       ...props
     },
     ref,
@@ -338,7 +338,7 @@ export const Navbar = React.forwardRef<HTMLElement, NavbarProps>(
               {/* Theme toggler */}
               <ThemeToggler />
               {/* Info menu */}
-              <InfoMenu onItemClick={onInfoItemClick} />
+              {/* <InfoMenu onItemClick={onInfoItemClick} /> */}
               {/* Notification */}
               <NotificationMenu
                 notificationCount={notificationCount}
@@ -347,7 +347,7 @@ export const Navbar = React.forwardRef<HTMLElement, NavbarProps>(
             </div>
             {/* User menu */}
             {status === "authenticated" ? (
-              <UserMenu session={session} userAvatar={userAvatar} onItemClick={onUserItemClick} />
+              <UserMenu session={session} userAvatar={userAvatar} />
             ) : (
               <SigninForm isDialog />
             )}
