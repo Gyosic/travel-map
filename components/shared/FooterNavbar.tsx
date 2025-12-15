@@ -1,6 +1,6 @@
 "use client";
 
-import { MapPinned, ScrollText } from "lucide-react";
+import { Album, MapPinned, ScrollText } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { ButtonGroup, ButtonGroupSeparator } from "@/components/ui/button-group";
@@ -14,13 +14,18 @@ export function FooterNavbar({ className }: FooterNavbarProps) {
   const pathname = usePathname();
   const isFeedPage = pathname.includes("/feed");
   const isHomePage = pathname === "/";
+  const isStoryPage = pathname.includes("/story");
 
   const onClickMap = () => {
     router.push("/");
   };
 
-  const onClickList = () => {
+  const onClickFeed = () => {
     router.push("/feed");
+  };
+
+  const onClickStory = () => {
+    router.push("/story");
   };
 
   return (
@@ -46,9 +51,23 @@ export function FooterNavbar({ className }: FooterNavbarProps) {
         variant="ghost"
         className={cn(
           "flex flex-1 flex-col items-center justify-center py-10",
+          isStoryPage && "bg-primary text-primary-foreground",
+        )}
+        onClick={() => onClickStory()}
+        disabled={isStoryPage}
+      >
+        <Album className={cn("size-6", isStoryPage && "text-primary-foreground")} />
+        <span className="text-xs">스토리</span>
+      </Button>
+      <ButtonGroupSeparator />
+      <Button
+        type="button"
+        variant="ghost"
+        className={cn(
+          "flex flex-1 flex-col items-center justify-center py-10",
           isFeedPage && "bg-primary text-primary-foreground",
         )}
-        onClick={() => onClickList()}
+        onClick={() => onClickFeed()}
         disabled={isFeedPage}
       >
         <ScrollText className={cn("size-6", isFeedPage && "text-primary-foreground")} />
