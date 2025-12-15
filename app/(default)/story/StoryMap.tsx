@@ -309,7 +309,7 @@ export function StoryMap({ className }: StoryMapProps) {
 
   return (
     <>
-      <div id="map" className={cn("relative h-full w-full", className)}></div>;
+      <div id="map" className={cn("relative h-full w-full", className)}></div>
       {isStoryOpen && photos.length > 0 && (
         <PhotoStory
           photos={photos}
