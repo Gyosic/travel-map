@@ -188,7 +188,7 @@ export function PhotoStory({
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.5 }}
-                className="absolute right-0 bottom-0 left-0 from-black/80 to-transparent p-8"
+                className="absolute top-0 right-0 left-0 from-black/80 to-transparent p-8"
               >
                 {currentPhoto.caption && (
                   <p className="mb-2 font-medium text-white text-xl">{currentPhoto.caption}</p>
@@ -238,26 +238,19 @@ export function PhotoStory({
         </Button>
 
         {/* Progress indicator */}
-        <div className="flex gap-1">
-          {photos.map((_, index) => (
+        <div className="flex items-center gap-2">
+          {/* Progress bar */}
+          <div className="h-1 w-32 overflow-hidden rounded-full bg-white/20">
             <div
-              key={index}
-              className={cn(
-                "h-1 cursor-pointer rounded-full transition-all",
-                index === currentIndex ? "w-8 bg-white" : "w-6 bg-white/40 hover:bg-white/60",
-              )}
-              onClick={() => {
-                setCurrentIndex(index);
-                setCurrentTransition(getRandomTransition());
-              }}
+              className="h-full rounded-full bg-white transition-all duration-300"
+              style={{ width: `${((currentIndex + 1) / photos.length) * 100}%` }}
             />
-          ))}
+          </div>
+          {/* Counter */}
+          <span className="whitespace-nowrap text-sm text-white">
+            {currentIndex + 1} / {photos.length}
+          </span>
         </div>
-
-        {/* Counter */}
-        <span className="text-sm text-white">
-          {currentIndex + 1} / {photos.length}
-        </span>
       </div>
     </div>
   );
