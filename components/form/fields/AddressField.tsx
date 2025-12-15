@@ -89,16 +89,42 @@ export function AddressField<T extends FieldValues, K extends FieldPath<T>>({
     navigator.geolocation.getCurrentPosition(
       async (position) => {
         const center: [number, number] = [position.coords.longitude, position.coords.latitude];
+        let address;
+        if (field.value) {
+          const res = await fetch(`/api/address?request=getCoord&type=ROAD&address=${field.value}`);
+
+          let { response: { status, result } = {} } = await res.json();
+
+          if (status === "NOT_FOUND") {
+            const res = await fetch(
+              `/api/address?request=getCoord&type=PARCEL&address=${field.value}`,
+            );
+
+            const { response: { result: parcelResult } = {} } = await res.json();
+
+            result = parcelResult;
+          }
+          const { point: { x, y } = {} } = result || {};
+
+          if (x && y) {
+            center[0] = Number(x);
+            center[1] = Number(y);
+          }
+
+          address = field.value;
+        } else {
+          const res = await fetch(
+            `/api/address?request=getAddress&type=BOTH&point=${center.join(",")}`,
+          );
+          const { response: { result = [] } = {} } = await res.json();
+
+          let addr = result.find((item: { type: string }) => item.type === "road");
+          if (!addr) addr = result.find((item: { type: string }) => item.type === "parcel");
+
+          address = addr;
+        }
 
         mapRef.current?.flyTo({ center });
-
-        const res = await fetch(
-          `/api/address?request=getAddress&type=BOTH&point=${center.join(",")}`,
-        );
-        const { response: { result = [] } = {} } = await res.json();
-
-        let address = result.find((item: { type: string }) => item.type === "road");
-        if (!address) address = result.find((item: { type: string }) => item.type === "parcel");
 
         const event = { target: { value: address.text } };
         field.onChange(event);
