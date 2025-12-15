@@ -5,7 +5,7 @@ import { geoPool } from "@/lib/pg";
 export async function GET() {
   try {
     const { rows } = await geoPool.query(
-      `SELECT id, ST_AsBinary(geom_4326) AS geom, sgg_cd, sgg_name FROM sgg`,
+      `SELECT id, wkb_geometry AS geom, sgg_cd, sgg_name FROM sgg`,
     );
     const geojson = {
       type: "FeatureCollection",
