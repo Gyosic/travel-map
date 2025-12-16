@@ -68,6 +68,11 @@ export function PhotoStory({
 
   const [currentTransition, setCurrentTransition] = useState(getRandomTransition());
 
+  // photos가 1개일 경우 자동재생 정지
+  useEffect(() => {
+    if (photos.length === 1) setIsPlaying(false);
+  }, [photos]);
+
   // 자동 재생
   useEffect(() => {
     if (!isPlaying) return;
@@ -206,27 +211,29 @@ export function PhotoStory({
       </div>
 
       {/* Navigation buttons */}
-      <div className="-translate-y-1/2 pointer-events-none absolute inset-x-0 top-1/2 flex justify-between px-4">
-        <Button
-          variant="ghost"
-          size="icon"
-          className="pointer-events-auto h-12 w-12 rounded-full text-white hover:bg-white/20"
-          onClick={goToPrev}
-        >
-          <ChevronLeft className="h-8 w-8" />
-        </Button>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="pointer-events-auto h-12 w-12 rounded-full text-white hover:bg-white/20"
-          onClick={goToNext}
-        >
-          <ChevronRight className="h-8 w-8" />
-        </Button>
-      </div>
+      {photos.length > 1 && (
+        <div className="pointer-events-none absolute inset-x-0 top-1/2 flex -translate-y-1/2 justify-between px-4">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="pointer-events-auto h-12 w-12 rounded-full text-white hover:bg-white/20"
+            onClick={goToPrev}
+          >
+            <ChevronLeft className="h-8 w-8" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="pointer-events-auto h-12 w-12 rounded-full text-white hover:bg-white/20"
+            onClick={goToNext}
+          >
+            <ChevronRight className="h-8 w-8" />
+          </Button>
+        </div>
+      )}
 
       {/* Controls */}
-      <div className="-translate-x-1/2 absolute bottom-8 left-1/2 flex items-center gap-4">
+      <div className="absolute bottom-8 left-1/2 flex -translate-x-1/2 items-center gap-4">
         {/* Play/Pause button */}
         <Button
           variant="ghost"

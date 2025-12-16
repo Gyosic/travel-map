@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { useState } from "react";
 import { toast } from "sonner";
+import { PhotoStory } from "@/components/shared/PhotoStory";
 import { StarButton } from "@/components/shared/StarButton";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -25,6 +26,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Separator } from "@/components/ui/separator";
+import { Photo, usePhotoStory } from "@/hooks/use-photo-story";
 import type { FileType } from "@/lib/schema/file";
 // import { AnimatedTestimonials } from "@/components/ui/shadcn-io/animated-testimonials";
 import { HistoryType } from "@/lib/schema/history.schema";
@@ -48,8 +50,11 @@ interface TravelPostCardProps {
 
 export function TravelPostCard({ history, onDelete }: TravelPostCardProps) {
   const router = useRouter();
-  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const session = useSession();
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+  const { generateRecentStory } = usePhotoStory();
+  const [photos, setPhotos] = useState<Photo[]>([]);
+  const [isStoryOpen, setIsStoryOpen] = useState(false);
 
   const onDeleteItem = async (id: string) => {
     if (session.status !== "authenticated") {
@@ -77,18 +82,28 @@ export function TravelPostCard({ history, onDelete }: TravelPostCardProps) {
       toast.error("로그인이 필요합니다.");
     } else router.push(`/post/${history._id}`);
   };
+  const handleClickImage = (history: HistoryType) => {
+    const storyPhotos = generateRecentStory([history]);
+    setPhotos(storyPhotos);
+    setIsStoryOpen(true);
+  };
+  const handleStoryClose = () => {
+    setPhotos([]);
+    setIsStoryOpen(false);
+  };
+
   return (
     <Card className="relative overflow-hidden">
       <div className="relative h-64 w-full overflow-hidden">
         <AnimatedTestimonials
           className="h-full w-full bg-background/50 p-0 dark:bg-background-foreground/50"
           testimonials={
-            history?.images?.map((image) => ({ src: `/api/files/${(image as FileType).src}` })) ??
-            []
+            history?.images?.map((image) => ({ src: `/api/files${(image as FileType).src}` })) ?? []
           }
           autoplay
           autoplayInterval={5000}
           enableBtn={false}
+          onClick={() => handleClickImage(history)}
         />
       </div>
 
@@ -113,7 +128,7 @@ export function TravelPostCard({ history, onDelete }: TravelPostCardProps) {
       </CardHeader>
 
       <CardContent className="relative w-full">
-        <p className="text-muted-foreground">{history.content}</p>
+        <p className="w-full break-words text-muted-foreground">{history.content}</p>
       </CardContent>
       {!!history?.tags?.length && (
         <>
@@ -179,6 +194,15 @@ export function TravelPostCard({ history, onDelete }: TravelPostCardProps) {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {isStoryOpen && photos.length > 0 && (
+        <PhotoStory
+          photos={photos}
+          autoPlayInterval={4000}
+          onClose={handleStoryClose}
+          enableKenBurns={true}
+        />
+      )}
     </Card>
   );
 }

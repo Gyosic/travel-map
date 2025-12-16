@@ -18,6 +18,7 @@ export interface AnimatedTestimonialsProps {
   autoplayInterval?: number;
   className?: string;
   enableBtn? :boolean;
+  onClick?: () => void;
 }
 
 export const AnimatedTestimonials = ({
@@ -26,6 +27,7 @@ export const AnimatedTestimonials = ({
   autoplayInterval = 5000,
   className,
   enableBtn = true,
+  onClick
 }: AnimatedTestimonialsProps) => {
   const [active, setActive] = useState(0);
 
@@ -95,14 +97,15 @@ export const AnimatedTestimonials = ({
                   ease: "easeInOut",
                 }}
                 className="absolute inset-0 origin-bottom"
+                onClick={onClick}
               >
                 <img
                   src={testimonial.src}
-                  alt={testimonial.name}
-                  width={500}
-                  height={500}
+                  alt={testimonial.name || ""}
+                  width={10}
+                  height={10}
                   draggable={false}
-                  className="h-full w-full rounded-3xl object-cover object-center"
+                  className="h-full w-full rounded-3xl object-contain object-center"
                 />
               </motion.div>
             ))}
@@ -128,37 +131,6 @@ export const AnimatedTestimonials = ({
               ease: "easeInOut",
             }}
           >
-            {/* <h3 className="text-2xl font-bold text-black dark:text-white">
-              {testimonials[active].name}
-            </h3>
-            <p className="text-sm text-gray-500 dark:text-neutral-500">
-              {testimonials[active].designation}
-            </p>
-            <motion.p className="mt-8 text-lg text-gray-500 dark:text-neutral-300">
-              {testimonials[active].quote.split(" ").map((word, index) => (
-                <motion.span
-                  key={index}
-                  initial={{
-                    filter: "blur(10px)",
-                    opacity: 0,
-                    y: 5,
-                  }}
-                  animate={{
-                    filter: "blur(0px)",
-                    opacity: 1,
-                    y: 0,
-                  }}
-                  transition={{
-                    duration: 0.2,
-                    ease: "easeInOut",
-                    delay: 0.02 * index,
-                  }}
-                  className="inline-block"
-                >
-                  {word}&nbsp;
-                </motion.span>
-              ))}
-            </motion.p> */}
           </motion.div>
           {enableBtn && <div className="flex gap-4 justify-center">
             <button

@@ -1,7 +1,7 @@
 import { useCallback } from "react";
 import { HistoryType } from "@/lib/schema/history.schema";
 
-interface Photo {
+export interface Photo {
   src: string;
   alt?: string;
   caption?: string;
