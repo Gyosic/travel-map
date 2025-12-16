@@ -15,7 +15,7 @@ export function AddButton() {
       type="button"
       size="icon"
       className={cn(
-        "absolute right-5 bottom-25 z-50 rounded-full shadow-lg",
+        "fixed right-5 bottom-25 z-50 rounded-full shadow-lg",
         isPostPage && "hidden",
       )}
       onClick={() => router.push("/post")}
