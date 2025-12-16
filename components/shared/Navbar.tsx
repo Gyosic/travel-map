@@ -9,6 +9,7 @@ import { signOut, useSession } from "next-auth/react";
 import * as React from "react";
 import { useEffect, useMemo, useRef } from "react";
 import { PasswordForm } from "@/components/shared/PasswordForm";
+import { ProfileForm } from "@/components/shared/ProfileForm";
 import { SigninForm } from "@/components/shared/SigninForm";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -170,7 +171,7 @@ const UserMenu = ({
           className="h-9 px-2 py-0 hover:bg-accent hover:text-accent-foreground"
         >
           <Avatar className="h-7 w-7">
-            <AvatarImage src={user?.picture ?? ""} alt={user?.name || ""} />
+            <AvatarImage src={user?.image ?? ""} alt={user?.name || ""} />
             <AvatarFallback className="text-xs">
               {(user?.name ?? "")
                 .split(" ")
@@ -190,9 +191,9 @@ const UserMenu = ({
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={() => onItemClick("profile")}>Profile</DropdownMenuItem>
+        <DropdownMenuItem onClick={() => onItemClick("profile")}>프로필 변경</DropdownMenuItem>
         <DropdownMenuItem onClick={() => onItemClick("password")}>비밀번호 변경</DropdownMenuItem>
-        <DropdownMenuItem onClick={() => onItemClick("billing")}>Billing</DropdownMenuItem>
+        {/* <DropdownMenuItem onClick={() => onItemClick("billing")}>Billing</DropdownMenuItem> */}
         <DropdownMenuSeparator />
         <DropdownMenuItem
           onClick={() => {
@@ -217,6 +218,19 @@ const UserMenu = ({
             email={user?.email!}
             // onSubmit={() => setDialog({ ...dialog, password: false })}
           />
+        </DialogContent>
+      </Dialog>
+
+      <Dialog
+        open={dialog.profile}
+        onOpenChange={(open) => setDialog({ ...dialog, profile: open })}
+      >
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>프로필 변경</DialogTitle>
+          </DialogHeader>
+
+          <ProfileForm user={user!} />
         </DialogContent>
       </Dialog>
     </DropdownMenu>

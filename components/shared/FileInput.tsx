@@ -114,7 +114,7 @@ export default function FileInput({ accept, value = [], multiple, onChange }: Fi
 
                     <Image
                       alt="Preview"
-                      className="h-full w-full object-cover"
+                      className="h-full w-full object-contain"
                       src={file.src}
                       width={1000}
                       height={1000}

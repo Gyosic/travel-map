@@ -82,7 +82,7 @@ export async function POST(req: NextRequest) {
       if (files.length > 0) {
         try {
           for (const { src } of files) {
-            await fileSystemService.unlink({ filepath: src });
+            await fileSystemService.unlink({ filepath: src.replace(`/${storageName}`, "") });
           }
         } catch (unlinkError) {
           console.error("Failed to cleanup file:", unlinkError);
