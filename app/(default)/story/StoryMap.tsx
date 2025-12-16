@@ -40,12 +40,16 @@ export function StoryMap({ className }: StoryMapProps) {
       const feature = e.features?.[0];
 
       if (feature) {
-        // TODO: 스토리 Tooltip 표시
         try {
           if (session.status !== "authenticated") {
-            const localHistories = JSON.parse(localStorage.getItem("histories") || "[]");
+            const localHistories: HistoryType[] = JSON.parse(
+              localStorage.getItem("histories") || "[]",
+            );
 
-            const storyPhotos = generateRecentStory(localHistories, 15);
+            const storyPhotos = generateRecentStory(
+              localHistories.filter(({ sido_cd }) => feature?.properties.sido_cd === sido_cd),
+              15,
+            );
             if (storyPhotos.length === 0) return;
 
             setPhotos(storyPhotos);
