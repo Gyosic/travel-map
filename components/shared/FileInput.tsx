@@ -72,7 +72,16 @@ export default function FileInput({ accept, value = [], multiple, onChange }: Fi
     }
   };
 
+  // 카메라 권한 요청
+  const requestCameraPermission = async () => {
+    try {
+      await navigator.mediaDevices.getUserMedia({ video: true });
+    } catch {}
+  };
+
   useEffect(() => {
+    requestCameraPermission();
+
     parseFiles(files as File[]);
 
     onChange?.(files);
