@@ -32,13 +32,13 @@ export default function TravelMap({ className }: TravelMapProps) {
         const feature = e.features[0];
         //호버 애니메이션 - feature state 변경
         if (!isNil(hoveredFeatureId) && hoveredFeatureId !== feature.id) {
-          mapRef.current?.setFeatureState(
+          mapRef.current?.setFeatureState?.(
             { source: sourceName, id: hoveredFeatureId },
             { hover: false },
           );
         }
         hoveredFeatureId = feature.id;
-        mapRef.current?.setFeatureState(
+        mapRef.current?.setFeatureState?.(
           { source: sourceName, id: hoveredFeatureId },
           { hover: true },
         );
@@ -48,7 +48,7 @@ export default function TravelMap({ className }: TravelMapProps) {
     mapRef.current.on("mouseleave", layerId, () => {
       // 애니메이션 상태 리셋
       if (!isNil(hoveredFeatureId)) {
-        mapRef.current?.setFeatureState(
+        mapRef.current?.setFeatureState?.(
           { source: sourceName, id: hoveredFeatureId },
           { hover: false },
         );
@@ -66,6 +66,7 @@ export default function TravelMap({ className }: TravelMapProps) {
   };
   const getHistories = useCallback(
     async (sidoGeojson: GeoJSON.FeatureCollection) => {
+      // 기존 팝업 제거
       popups.forEach((p) => p.remove());
 
       const rows = [];
@@ -84,13 +85,14 @@ export default function TravelMap({ className }: TravelMapProps) {
       if (rows?.length > 0) {
         const newPopups: maplibregl.Popup[] = [];
         each(rows, (row) => {
-          const container = document.createElement("div");
-          container.className = "w-full h-full flex justify-center items-center";
-
           const imageCnt = row.images?.length ?? 0;
-          const imageSrc = `/api/files${row.images?.[imageCnt - 1]?.src}`;
 
           if (imageCnt > 0) {
+            const container = document.createElement("div");
+            container.className = "w-full h-full flex justify-center items-center";
+
+            const imageSrc = `/api/files${row.images?.[imageCnt - 1]?.src}`;
+
             const root = createRoot(container);
             root.render(
               <div className="relative flex h-full w-full items-center justify-center">
@@ -101,6 +103,8 @@ export default function TravelMap({ className }: TravelMapProps) {
                   width={0}
                   height={0}
                   className="h-full w-full object-cover"
+                  priority={false}
+                  loading="lazy"
                 ></Image>
                 <div className="absolute z-50 flex h-full w-full flex-1 items-center justify-center font-bold text-primary-foreground">
                   <span className="truncate">{imageCnt}</span>
@@ -123,8 +127,9 @@ export default function TravelMap({ className }: TravelMapProps) {
 
             newPopups.push(popup);
           }
-          setPopups(newPopups);
         });
+        // 루프 밖으로 이동 - 한번만 state 업데이트
+        setPopups(newPopups);
 
         const grouped: Record<string, { [key: string]: unknown }[]> = rows.reduce(
           (
@@ -147,7 +152,7 @@ export default function TravelMap({ className }: TravelMapProps) {
           );
           if (!feature) return;
 
-          mapRef.current?.setFeatureState(
+          mapRef.current?.setFeatureState?.(
             { source: "sido", id: feature?.properties?.id! },
             { count: rows.length },
           );
@@ -159,7 +164,7 @@ export default function TravelMap({ className }: TravelMapProps) {
     [session.status],
   );
 
-  const getSidoGeojson = async () => {
+  const getSidoGeojsonData = useCallback(async () => {
     const sidoGeojson = await fetch(`/api/geojson/sido`);
     const sidoGeojsonData = await sidoGeojson.json();
 
@@ -171,14 +176,14 @@ export default function TravelMap({ className }: TravelMapProps) {
     setSidoList(sidoList);
 
     return sidoGeojsonData;
-  };
+  }, [setSidoList]);
 
   const onLoadMap = useCallback(async () => {
     if (!mapRef.current) return;
 
-    const sidoGeojson = await getSidoGeojson();
+    const sidoGeojson = await getSidoGeojsonData();
 
-    const sidoSource = mapRef.current.getSource("sido");
+    const sidoSource = mapRef.current?.getSource?.("sido");
     if (!sidoSource)
       mapRef.current.addSource("sido", {
         type: "geojson",
@@ -245,7 +250,7 @@ export default function TravelMap({ className }: TravelMapProps) {
     await getHistories(sidoGeojson);
 
     mapRef.current.resize();
-  }, [session.status]);
+  }, [getSidoGeojsonData, getHistories]);
 
   useEffect(() => {
     if (session.status === "loading") return;
